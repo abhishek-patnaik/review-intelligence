@@ -13,3 +13,5 @@ data/cache/
 # rebuilt by the pipeline
 outputs/data/
 outputs_synthetic/
+# internal working labels used to tune the prompt on the dev split, not published
+data/labels/reference_labels.csv

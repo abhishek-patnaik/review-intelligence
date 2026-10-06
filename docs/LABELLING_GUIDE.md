@@ -1,10 +1,9 @@
 # Labelling guide
 
-Rules for tagging a review with complaint themes. They exist because the first
-33 human labels and the reference labels disagreed on half the reviews, almost
-always over a rule nobody had written down. The same rules go into the model's
-prompt, so the model, the reference labels and my own labels are judged against
-one definition.
+Rules for tagging a review with complaint themes. The short theme definitions
+in config.toml left common cases open, so these rules settle them. The same
+rules go into the classifier prompt, so the model and the labels it is scored
+against share one definition.
 
 ## General
 
