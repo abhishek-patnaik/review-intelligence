@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review labelling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ea; --paper:#fbfaf6; --ink:#1d1b17; --soft:#6f695d;
+  --line:#e2ddd1; --accent:#b4471f; --accent-soft:#f3e2d8; --ok:#3f6b4a; --ok-soft:#e1ebe2;
+  --serif:"Newsreader",Georgia,serif; --sans:"Inter Tight",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:100vh}
+header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:2}
+.bar{max-width:980px;margin:0 auto;padding:14px 20px;display:flex;align-items:baseline;gap:16px}
+.bar h1{font-size:15px;font-weight:600;letter-spacing:.01em}
+.bar .count{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--soft)}
+.track{height:2px;background:var(--line)} .fill{height:2px;background:var(--accent);width:0;transition:width .25s}
+main{max-width:980px;margin:0 auto;padding:28px 20px 120px}
+.meta{display:flex;gap:12px;align-items:center;font-size:12.5px;color:var(--soft);margin-bottom:14px}
+.stars{font-size:15px;letter-spacing:2px;color:var(--accent)} .stars i{color:var(--line);font-style:normal}
+.tag{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:3px 7px;border:1px solid var(--line);border-radius:3px}
+.tag.done{border-color:var(--ok);color:var(--ok);background:var(--ok-soft)}
+.review{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:26px 28px}
+.pt{font-family:var(--serif);font-size:23px;line-height:1.42}
+.en{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);font-size:15px;line-height:1.55;color:var(--soft)}
+.en b{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.08em;margin-right:8px;color:var(--soft)}
+h2{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--soft);margin:30px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chip{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:10px 12px;cursor:pointer;font:inherit;color:inherit}
+.chip:hover{border-color:#c9c2b2}
+.chip kbd{font-family:var(--mono);font-size:11px;min-width:20px;height:20px;display:grid;place-items:center;border:1px solid var(--line);border-radius:3px;color:var(--soft);flex:none}
+.chip .n{font-size:13.5px;font-weight:500} .chip .d{font-size:11.5px;color:var(--soft);line-height:1.35;margin-top:2px}
+.chip.on{border-color:var(--accent);background:var(--accent-soft)} .chip.on kbd{background:var(--accent);border-color:var(--accent);color:#fff}
+.row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{font:inherit;font-size:13.5px;padding:9px 14px;border-radius:5px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.btn kbd{font-family:var(--mono);font-size:10.5px;color:var(--soft)}
+.btn.on{border-color:var(--ink);background:var(--ink);color:var(--paper)} .btn.on kbd{color:#c9c2b2}
+.note{flex:1;min-width:220px;font:inherit;font-size:13.5px;padding:9px 12px;border:1px solid var(--line);border-radius:5px;background:var(--paper)}
+footer{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--line)}
+footer .bar{align-items:center}
+.save{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600} .save kbd{color:#f3d2c3}
+.hint{font-size:12px;color:var(--soft)}
+.toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);font-size:12.5px;padding:7px 12px;border-radius:4px;opacity:0;transition:opacity .2s}
+.toast.show{opacity:1}
+@media (max-width:760px){.grid{grid-template-columns:1fr 1fr}.pt{font-size:19px}.hint{display:none}}
+</style>
+</head>
+<body>
+<header><div class="bar"><h1>Review labelling</h1><span class="count" id="count">loading</span></div><div class="track"><div class="fill" id="fill"></div></div></header>
+<main>
+  <div class="meta"><span class="stars" id="stars"></span><span class="tag" id="split"></span><span class="tag" id="status"></span><span id="pos"></span></div>
+  <div class="review"><p class="pt" id="pt"></p><p class="en"><b>EN</b><span id="en"></span></p></div>
+  <h2>Complaint themes</h2>
+  <div class="grid" id="grid"></div>
+  <div class="row">
+    <button class="btn" id="none"><kbd>Space</kbd>No complaint</button>
+    <button class="btn" id="unsure"><kbd>U</kbd>Unsure</button>
+    <input class="note" id="note" placeholder="Note (optional, press N)">
+  </div>
+</main>
+<footer><div class="bar">
+  <button class="btn" id="prev"><kbd>&larr;</kbd>Back</button>
+  <button class="btn" id="jump"><kbd>J</kbd>Next unlabelled</button>
+  <span class="hint">Pick themes, then save. Saving with nothing picked means no complaint.</span>
+  <button class="btn save" id="save" style="margin-left:auto"><kbd>Enter</kbd>Save and next</button>
+</div></footer>
+<div class="toast" id="toast"></div>
+<script>
+const KEYS="123456789qwe";
+let themes={}, items=[], i=0, picked=new Set(), unsure=false;
+const $=id=>document.getElementById(id);
+
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),1300)}
+function progress(){
+  const done=items.filter(x=>x.label).length;
+  $("count").textContent=`${done} / ${items.length} labelled`;
+  $("fill").style.width=(100*done/items.length)+"%";
+}
+function render(){
+  const it=items[i];
+  $("stars").innerHTML="★".repeat(it.score)+"<i>"+"★".repeat(5-it.score)+"</i>";
+  $("split").textContent=it.split==="dev"?"dev set":"test set";
+  $("status").textContent=it.label?"labelled":"new"; $("status").className="tag"+(it.label?" done":"");
+  $("pos").textContent=`#${i+1}`;
+  $("pt").textContent=it.pt; $("en").textContent=it.en||"(no translation)";
+  picked=new Set(it.label?it.label.themes:[]); unsure=it.label?it.label.unsure:false;
+  $("note").value=it.label?it.label.note:"";
+  paint();
+}
+function paint(){
+  document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",picked.has(c.dataset.t)));
+  $("none").classList.toggle("on",picked.size===0&&!!items[i].label);
+  $("unsure").classList.toggle("on",unsure);
+}
+function toggle(t){picked.has(t)?picked.delete(t):picked.add(t);paint()}
+async function save(){
+  const it=items[i];
+  const body={id:it.id,themes:[...picked],unsure,note:$("note").value};
+  const r=await fetch("/api/label",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok){toast("Save failed: "+await r.text());return}
+  it.label={themes:[...picked],unsure,note:body.note};
+  progress(); toast(picked.size?[...picked].join(", "):"no complaint");
+  if(i<items.length-1){i++;render()} else toast("That was the last one");
+}
+function jump(){const k=items.findIndex(x=>!x.label);if(k<0)toast("Everything is labelled");else{i=k;render()}}
+
+document.addEventListener("keydown",e=>{
+  if(document.activeElement===$("note")){
+    if(e.key==="Enter"){e.preventDefault();$("note").blur();save()}
+    if(e.key==="Escape")$("note").blur();
+    return;
+  }
+  const k=e.key.toLowerCase(), idx=KEYS.indexOf(k);
+  if(idx>=0&&idx<Object.keys(themes).length){toggle(Object.keys(themes)[idx]);return}
+  if(e.key==="Enter"){e.preventDefault();save()}
+  else if(e.key===" "){e.preventDefault();picked.clear();paint()}
+  else if(k==="u"){unsure=!unsure;paint()}
+  else if(k==="n"){e.preventDefault();$("note").focus()}
+  else if(k==="j")jump();
+  else if(e.key==="ArrowLeft"&&i>0){i--;render()}
+  else if(e.key==="ArrowRight"&&i<items.length-1){i++;render()}
+});
+$("save").onclick=save; $("jump").onclick=jump;
+$("prev").onclick=()=>{if(i>0){i--;render()}};
+$("none").onclick=()=>{picked.clear();paint()};
+$("unsure").onclick=()=>{unsure=!unsure;paint()};
+
+fetch("/api/items").then(r=>r.json()).then(d=>{
+  themes=d.themes; items=d.items;
+  $("grid").innerHTML=Object.entries(themes).map(([t,desc],k)=>
+    `<button class="chip" data-t="${t}"><kbd>${KEYS[k].toUpperCase()}</kbd><span><div class="n">${t.replace(/_/g," ")}</div><div class="d">${desc}</div></span></button>`).join("");
+  document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>toggle(c.dataset.t));
+  progress(); i=Math.max(0,items.findIndex(x=>!x.label)); render();
+});
+</script>
+</body>
+</html>

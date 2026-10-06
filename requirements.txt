@@ -10,6 +10,10 @@ tomli>=2.0; python_version < "3.11"
 # talking to the local model served by Ollama
 requests>=2.31
 
+# offline translation for the labelling tool (no PyTorch needed)
+ctranslate2>=4.0
+sentencepiece>=0.2
+
 # tests
 pytest>=8.0
 

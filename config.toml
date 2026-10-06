@@ -18,8 +18,21 @@ timeout_seconds = 120
 
 [labels]
 # Reviews I label by hand to measure how often the model is right.
-sample_size = 500
+# Stratified by star rating, because a plain random sample would be 58% five
+# star reviews with almost no complaints, and rare themes would get too few
+# examples to measure. Results are reweighted to the real rating mix later.
+per_score = 100
+# Share kept as a dev set for improving the prompt. The rest is the test set,
+# which I only score once, at the end, so the accuracy figure is honest.
+dev_share = 0.3
 random_seed = 42
+port = 8765
+
+[translate]
+# Offline Portuguese to English model from Argos Translate, run with
+# CTranslate2. It is a separate model from the classifier, so the English I
+# read while labelling is not shaped by the model being tested.
+package_url = "https://argos-net.com/v1/translate-pt_en-1_9.argosmodel"
 
 [data.files]
 # Only the tables this project needs. Geolocation and sellers are left out.
