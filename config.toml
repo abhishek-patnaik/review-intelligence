@@ -15,6 +15,9 @@ random_seed = 42
 # prompt are never mixed with new ones.
 prompt_version = "v1"
 timeout_seconds = 120
+# Reviews sent to Ollama at once. Match it to OLLAMA_NUM_PARALLEL on the
+# Ollama side, or the extra requests just queue.
+workers = 4
 
 [labels]
 # Reviews I label by hand to measure how often the model is right.

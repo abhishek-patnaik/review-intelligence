@@ -4,6 +4,7 @@
     python -m reviews smoke --n 20     classify a few random reviews and print them
     python -m reviews sample           draw the hand labelling sample and translate it
     python -m reviews label            open the labelling tool in the browser
+    python -m reviews evaluate         score the model on the dev split of the reference labels
 """
 
 from __future__ import annotations
@@ -76,6 +77,43 @@ def cmd_label(args) -> None:
     label_app.serve(load_config())
 
 
+def cmd_evaluate(args) -> None:
+    import json
+
+    from reviews import evaluate as ev
+    from reviews.config import paths_for
+    from reviews.llm import Classifier
+
+    cfg = load_config()
+    if args.model:
+        cfg["llm"]["model"] = args.model
+    clf = Classifier(cfg)
+    clf.check()
+    df = ev.load_truth(args.labels)
+    if args.split != "all":
+        df = df[df.split == args.split]
+    if args.split == "test" and not args.confirm_test:
+        raise SystemExit("The test split is scored once, at the very end. Add --confirm-test if that is now.")
+    themes = list(cfg["themes"])
+    print(f"Scoring {cfg['llm']['model']} (prompt {cfg['llm']['prompt_version']}) on "
+          f"{len(df)} {args.split} reviews against {args.labels} labels")
+    start = time.time()
+    pred = ev.classify_many(clf, df.text.tolist(), cfg["llm"].get("workers", 1))
+    print(f"  done in {time.time() - start:.0f}s")
+    truth = [[t for t in x.split(";") if t] for x in df.themes]
+    table, summary = ev.score(truth, pred, themes)
+    tag = f"{cfg['llm']['model'].replace(':', '_')}_{cfg['llm']['prompt_version']}_{args.split}_{args.labels}"
+    paths = paths_for("real")
+    table.to_csv(paths.tables / f"eval_{tag}.csv", index=False)
+    (paths.tables / f"eval_{tag}.json").write_text(json.dumps(summary, indent=2))
+    errors = df.assign(truth=[";".join(t) for t in truth], pred=[";".join(p) for p in pred])
+    errors = errors[errors.truth != errors.pred][["review_id", "review_score", "text", "text_en", "truth", "pred"]]
+    errors.to_csv(paths.tables / f"errors_{tag}.csv", index=False)
+    print(table.round(2).to_string(index=False))
+    print("\n" + "\n".join(f"  {k}: {v:.3f}" if isinstance(v, float) else f"  {k}: {v}" for k, v in summary.items()))
+    print(f"\n{len(errors)} reviews where model and labels differ, saved to outputs/tables/errors_{tag}.csv")
+
+
 def main() -> None:
     p = argparse.ArgumentParser(prog="reviews")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -88,5 +126,11 @@ def main() -> None:
     s.add_argument("--force", action="store_true")
     s.set_defaults(func=cmd_sample)
     sub.add_parser("label").set_defaults(func=cmd_label)
+    s = sub.add_parser("evaluate")
+    s.add_argument("--split", default="dev", choices=["dev", "test", "all"])
+    s.add_argument("--labels", default="reference", choices=["reference", "human"])
+    s.add_argument("--model", default=None, help="override the model in config.toml")
+    s.add_argument("--confirm-test", action="store_true")
+    s.set_defaults(func=cmd_evaluate)
     args = p.parse_args()
     args.func(args)
