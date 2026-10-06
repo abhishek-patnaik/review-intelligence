@@ -33,3 +33,15 @@ Labelling the first reviews showed that the one line theme definitions did not s
 ## 8. The headline accuracy comes from a hand labelled test set
 
 I hand label a fixed set of 100 test reviews (20 per star rating), blind to the model's answers, and report the model's accuracy against those. A separate dev split is used only to iterate on the prompt, so the test set never shapes the prompt it is scoring.
+
+## 9. Problems are ranked by the orders and ratings they touch, not by churn
+
+I planned to size each complaint by the repeat purchases it costs. The data does not support that: customers with no complaint buy again about 5% of the time, and every complaint theme sits within its confidence interval. Reporting a "revenue lost to churn" figure from noise would be invented precision. So the fix list ranks themes by the value of the orders behind them, and shows how many stars each takes off the average rating. A review that mentions two problems has its rating shortfall split between them, so overlapping themes are not counted twice.
+
+## 10. An outside check on the classifier that needs no labels
+
+The model never sees delivery dates. If it reads delivery complaints correctly, reviews it tags as late should belong to orders Olist actually delivered late. They do, about ten times as often as reviews with no complaint. This does not replace the labelled accuracy check, but it cannot be biased by how the labels were written.
+
+## 11. Sellers are compared by complaint rate, not complaint count
+
+The sellers with the most complaints are mostly the sellers with the most orders. Ranking by count would flag them for being big. I compare complaint rates among sellers with at least 30 written reviews.

@@ -8,6 +8,7 @@
     python -m reviews evaluate         score the model on the dev split while tuning the prompt
     python -m reviews classify         classify every review with text (hours; resumable)
     python -m reviews overnight        dev scores for prompt v1 and v2, then the full classification
+    python -m reviews report           tables, charts, REPORT.md and the README findings
 """
 
 from __future__ import annotations
@@ -199,6 +200,35 @@ def cmd_overnight(args) -> None:
             sys.stdout = sys.__stdout__
 
 
+def cmd_report(args) -> None:
+    import pandas as pd
+
+    from reviews import report
+    from reviews.config import paths_for
+    from reviews.llm import Classifier
+
+    cfg = load_config()
+    raw = data.load_raw(cfg)
+    paths = paths_for("real")
+    f = paths.data / "review_themes.parquet"
+    if f.exists() and not args.partial:
+        rt = pd.read_parquet(f)
+        themes = dict(zip(rt.text, rt.themes))
+        partial = rt.themes.isna().any()
+    elif args.partial:
+        from reviews.labels import clean_text
+
+        clf = Classifier(cfg)
+        texts = raw["reviews"].review_comment_message.dropna().map(clean_text).unique()
+        themes = {t: (";".join(clf.cache[clf._key(t)]) if clf._key(t) in clf.cache else None) for t in texts}
+        partial = True
+    else:
+        raise SystemExit("No classified reviews yet. Run: python -m reviews classify")
+    ctx = report.build(cfg, raw, themes, partial, paths)
+    print(f"Wrote REPORT.md, README findings, {len(list(paths.figures.glob('*.png')))} charts"
+          f"{' (partial run)' if partial else ''}")
+
+
 def main() -> None:
     p = argparse.ArgumentParser(prog="reviews")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -221,5 +251,8 @@ def main() -> None:
     s.set_defaults(func=cmd_evaluate)
     sub.add_parser("classify").set_defaults(func=cmd_classify)
     sub.add_parser("overnight").set_defaults(func=cmd_overnight)
+    s = sub.add_parser("report")
+    s.add_argument("--partial", action="store_true", help="use whatever is classified so far")
+    s.set_defaults(func=cmd_report)
     args = p.parse_args()
     args.func(args)

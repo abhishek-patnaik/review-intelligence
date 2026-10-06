@@ -81,3 +81,33 @@ refund_return = "Problems getting a refund, return, exchange or cancellation"
 packaging = "Complaint about packaging or how the item was packed"
 price_shipping = "Product or shipping is too expensive"
 other_complaint = "A complaint that fits none of the themes above"
+
+[size]
+# Who would fix each complaint, and the first action. Used in the fix list.
+[size.owner]
+not_delivered = "Logistics"
+late_delivery = "Logistics"
+missing_items = "Seller fulfilment"
+wrong_item = "Seller fulfilment"
+damaged_defective = "Seller and logistics"
+not_as_described = "Catalogue"
+poor_quality = "Catalogue"
+seller_support = "Seller operations"
+refund_return = "Customer service"
+packaging = "Seller fulfilment"
+price_shipping = "Pricing"
+other_complaint = "Mixed"
+
+[size.action]
+not_delivered = "Proactive alert and re-ship when a parcel stalls past the estimate; review carriers with the most stalled parcels"
+late_delivery = "Set delivery estimates from real carrier times per route instead of a fixed promise"
+missing_items = "Pick and pack check for multi-unit orders; flag sellers who split shipments without telling the customer"
+wrong_item = "Variant (colour, size, voltage) check at packing for the sellers with the most wrong items"
+damaged_defective = "Packaging standard for fragile categories; quality check sellers with repeat defect complaints"
+not_as_described = "Listing audit for the worst categories: photos, materials, 'original' claims"
+poor_quality = "Review the lowest rated products in the worst categories with their sellers"
+seller_support = "Response time target for sellers; tracking code sent automatically at dispatch"
+refund_return = "Clear return flow with a refund deadline"
+packaging = "Minimum packaging rules per category"
+price_shipping = "Combine shipping for multi-item orders from one seller"
+other_complaint = "Read a sample each month for new themes"
