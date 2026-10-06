@@ -3,203 +3,150 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Review Intelligence · Abhishek Patnaik</title>
-<meta name="description" content="What 40,950 Brazilian shoppers complained about, read by a local language model and checked against delivery records.">
+<title>What Olist's customers complained about | Abhishek Patnaik</title>
+<meta name="description" content="Notes from reading 40,950 Brazilian marketplace reviews with a small open model, joined back to orders and delivery dates.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f6f4ef; --paper:#fcfcfb; --ink:#141311; --ink2:#55534d; --ink3:#8a877e; --line:#e3e0d8;
-  --accent:#2a78d6; --accent-soft:#e3eefb; --warn:#b4471f;
-  --b1:#cde2fb; --b2:#9ec5f4; --b3:#6da7ec; --b4:#3987e5; --b5:#256abf; --b6:#184f95; --b7:#0d366b;
-  --serif:"Newsreader",Georgia,serif; --sans:"Inter Tight",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  --bg:#faf8f3; --ink:#1b1a17; --ink2:#4f4c45; --ink3:#86827a; --rule:#dcd7cc; --soft:#f0ece2;
+  --accent:#2a78d6; --hl:#fbe6a2; --warn:#b4471f;
+  --b1:#dbe8f8; --b2:#b2cff1; --b3:#7fb0e8; --b4:#4a8fdc; --b5:#2a72c4; --b6:#1d5596; --b7:#123a69;
+  --serif:"Source Serif 4",Georgia,serif; --sans:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#121211; --paper:#1a1a19; --ink:#f3f2ee; --ink2:#c3c2b7; --ink3:#8f8d84; --line:#2c2c2a;
-  --accent:#3987e5; --accent-soft:#1b2a3d; --warn:#e07a4f;
-  --b1:#183553; --b2:#1d4a7a; --b3:#22609f; --b4:#2a78d6; --b5:#5598e7; --b6:#86b6ef; --b7:#cde2fb;}}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#161614; --ink:#ece9e1; --ink2:#bdb9ae; --ink3:#8a867c; --rule:#34322d; --soft:#22211e;
+  --accent:#5598e7; --hl:#5a4a16; --warn:#e07a4f;
+  --b1:#1c2f45; --b2:#1f4269; --b3:#235a92; --b4:#2c74c4; --b5:#5598e7; --b6:#8bb9ef; --b7:#cfe1f8;}}
 *{box-sizing:border-box;margin:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
-a{color:inherit}
-.wrap{max-width:1080px;margin:0 auto;padding-inline:24px}
-nav .links{display:flex;gap:22px}
-nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-nav .wrap{display:flex;gap:22px;align-items:center;height:52px;font-size:13.5px}
-nav .brand{font-weight:600;margin-right:auto;letter-spacing:.01em}
-nav a{text-decoration:none;color:var(--ink2)} nav a:hover{color:var(--ink)}
-nav .gh{border:1px solid var(--line);padding:5px 11px;border-radius:999px;color:var(--ink)}
-header{padding-top:64px;padding-bottom:20px}
-.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
-h1{font-family:var(--serif);font-weight:500;font-size:clamp(38px,6vw,68px);line-height:1.04;letter-spacing:-.015em;margin:14px 0 20px;max-width:15ch}
-.lede{font-size:19px;color:var(--ink2);max-width:62ch}
-.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:44px}
-.tile{background:var(--paper);padding:20px 20px 18px}
-.tile .n{font-family:var(--serif);font-size:42px;line-height:1;font-weight:500;letter-spacing:-.01em}
-.tile .l{font-size:13.5px;color:var(--ink2);margin-top:10px;line-height:1.4}
-section{padding-top:84px}
-.sec-head{display:grid;grid-template-columns:200px 1fr;gap:32px;margin-bottom:28px}
-.sec-num{font-family:var(--mono);font-size:12px;color:var(--ink3);padding-top:10px;letter-spacing:.06em}
-h2{font-family:var(--serif);font-weight:500;font-size:clamp(28px,3.4vw,38px);line-height:1.12;letter-spacing:-.01em}
-.sec-head p{color:var(--ink2);margin-top:12px;max-width:62ch}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:22px}
-.grid2{display:grid;grid-template-columns:1.05fr 1fr;gap:20px;align-items:start}
-/* theme bars */
-.tbar{display:grid;grid-template-columns:150px 1fr 56px;align-items:center;gap:10px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:14px}
-.tbar:hover{background:var(--bg)} .tbar.on{background:var(--accent-soft)}
-.tbar .track{height:14px;position:relative}
-.tbar .fill{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:0 4px 4px 0;opacity:.85}
-.tbar.on .fill{opacity:1}
-.tbar .v{font-family:var(--mono);font-size:12.5px;color:var(--ink2);text-align:right}
-.hint{font-size:12.5px;color:var(--ink3);margin-top:10px}
-/* detail */
-.detail h3{font-family:var(--serif);font-weight:500;font-size:28px;line-height:1.1}
-.detail .def{color:var(--ink2);font-size:14.5px;margin:6px 0 16px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 16px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.stats .n{font-family:var(--mono);font-size:19px;font-weight:500}
-.stats .l{font-size:12px;color:var(--ink3);line-height:1.3;margin-top:2px}
-.ex-head{display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px}
-.ex-head b{font-size:12px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);font-weight:500}
-.toggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:2px;font-size:12px}
-.toggle button{border:0;background:none;padding:4px 10px;border-radius:999px;color:var(--ink2);cursor:pointer;font:inherit}
-.toggle button.on{background:var(--ink);color:var(--paper)}
-.quotes{display:grid;gap:10px;max-height:300px;overflow:auto;padding-right:4px}
-.quote{border-left:2px solid var(--accent);padding:2px 0 2px 12px}
-.quote p{font-family:var(--serif);font-size:16.5px;line-height:1.4}
-.quote small{display:block;font-size:12px;color:var(--ink3);margin-top:3px;font-family:var(--mono)}
-.more{margin-top:10px;font-size:13px;background:none;border:1px solid var(--line);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer}
-/* svg charts */
-svg text{font-family:var(--sans);fill:var(--ink2);font-size:12px}
-svg .mono{font-family:var(--mono)}
+body{background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.6}
+a{color:inherit;text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{color:var(--accent)}
+.page{max-width:1020px;margin:0 auto;padding:0 28px}
+.text{max-width:660px}
+.top{display:flex;justify-content:space-between;align-items:baseline;padding:22px 0;border-bottom:1px solid var(--rule);font-family:var(--sans);font-size:14px;color:var(--ink2)}
+.top b{color:var(--ink);font-weight:600}
+.top nav a{margin-left:18px}
+h1{font-weight:600;font-size:clamp(34px,5vw,50px);line-height:1.1;letter-spacing:-.01em;margin:64px 0 14px;max-width:18ch}
+.byline{font-family:var(--sans);font-size:14px;color:var(--ink3);margin-bottom:32px}
+p{margin:0 0 1em}
+mark{background:var(--hl);color:inherit;padding:0 2px}
+.numbers{display:flex;flex-wrap:wrap;border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);margin:36px 0 8px}
+.numbers div{flex:1 1 200px;padding:16px 18px 16px 0}
+.numbers div+div{padding-left:18px;border-left:1px solid var(--rule)}
+.numbers b{display:block;font-size:30px;font-weight:600;line-height:1.1}
+.numbers span{font-family:var(--sans);font-size:13.5px;color:var(--ink2);line-height:1.4;display:block;margin-top:6px}
+h2{font-size:28px;font-weight:600;line-height:1.2;margin:84px 0 14px;letter-spacing:-.005em}
+h3{font-size:22px;font-weight:600;margin-bottom:4px}
+.fig{margin:28px 0 8px;font-family:var(--sans)}
+.figcap{font-family:var(--sans);font-size:13.5px;color:var(--ink3);margin-top:10px;max-width:660px}
+.fig-title{font-family:var(--sans);font-size:14px;font-weight:600;margin-bottom:10px}
+sup a{font-family:var(--sans);font-size:11px;text-decoration:none;color:var(--accent);padding-left:1px}
+/* problems */
+.explore{display:grid;grid-template-columns:330px 1fr;gap:40px;margin-top:28px;font-family:var(--sans)}
+.tbar{display:grid;grid-template-columns:140px 1fr 46px;align-items:center;gap:10px;padding:4px 0;cursor:pointer;font-size:14px;color:var(--ink2);border:0;background:none;width:100%;text-align:left;font-family:inherit}
+.tbar .track{height:10px;position:relative}
+.tbar .fill{position:absolute;inset:0 auto 0 0;background:var(--b3)}
+.tbar.on{color:var(--ink);font-weight:600} .tbar.on .fill{background:var(--accent)}
+.tbar:hover{color:var(--ink)}
+.tbar .v{font-family:var(--mono);font-size:12.5px;text-align:right}
+.detail{border-left:1px solid var(--rule);padding-left:32px}
+.detail .def{color:var(--ink2);font-size:14.5px;margin-bottom:14px}
+.facts{font-size:14.5px;color:var(--ink2);line-height:1.7;margin-bottom:18px}
+.facts b{color:var(--ink);font-weight:600}
+.lang{font-size:13px;color:var(--ink3);margin-bottom:10px}
+.lang button{border:0;background:none;font:inherit;color:var(--ink3);cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+.lang button.on{color:var(--ink);text-decoration:none;font-weight:600}
+blockquote{font-family:var(--serif);font-size:17px;line-height:1.45;margin:0 0 14px;padding-left:14px;border-left:3px solid var(--soft)}
+blockquote cite{display:block;font-style:normal;font-family:var(--sans);font-size:12.5px;color:var(--ink3);margin-top:3px}
+.more{font-family:var(--sans);font-size:13.5px;border:0;background:none;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+/* charts */
+svg text{font-family:var(--sans);fill:var(--ink3);font-size:12px}
 #line{overflow-x:auto} #line svg{min-width:640px}
-.legend{display:flex;gap:18px;font-size:13px;color:var(--ink2);margin-bottom:8px;flex-wrap:wrap}
-.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
-.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--paper);font-size:12.5px;padding:8px 10px;border-radius:6px;opacity:0;transition:opacity .12s;z-index:20;max-width:260px;line-height:1.4}
-.tip b{font-weight:600}
-/* validation */
-.vrow{display:grid;grid-template-columns:170px 1fr 130px;gap:12px;align-items:center;padding:7px 0;font-size:14px}
-.vrow .track{height:18px;background:var(--bg);border-radius:4px;overflow:hidden}
-.vrow .fill{height:100%;border-radius:0 4px 4px 0}
-.vrow .v{font-family:var(--mono);font-size:12.5px;color:var(--ink2)}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th{font-weight:500;color:var(--ink3);font-size:12px;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
-td{padding:9px 10px;border-bottom:1px solid var(--line)}
-td.num,th.num{text-align:right;font-family:var(--mono);font-size:13px}
-/* heatmap */
-.heat{overflow-x:auto}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-family:var(--sans);font-size:12.5px;padding:7px 9px;opacity:0;transition:opacity .1s;z-index:20;max-width:260px;line-height:1.45}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:24px}
+.vrow{display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;padding:6px 0;font-family:var(--sans);font-size:14px;color:var(--ink2)}
+.vrow .track{height:12px;background:var(--soft)} .vrow .fill{height:100%}
+.vrow .v{font-family:var(--mono);font-size:12.5px;text-align:right}
+table{border-collapse:collapse;font-family:var(--sans);font-size:14px;width:100%}
+th{font-weight:500;color:var(--ink3);font-size:12.5px;text-align:left;padding:6px 8px;border-bottom:1px solid var(--ink)}
+td{padding:7px 8px;border-bottom:1px solid var(--rule);color:var(--ink2)}
+td.n,th.n{text-align:right;font-family:var(--mono);font-size:13px}
+.heat{overflow-x:auto;margin-top:24px}
 .heat table{min-width:820px}
-.heat td.c{padding:0;height:34px;text-align:center;font-family:var(--mono);font-size:11.5px;border:2px solid var(--paper);border-radius:4px}
-.heat th.rot{height:96px;vertical-align:bottom;padding:0 2px 8px;white-space:nowrap}
-.heat th.rot span{display:inline-block;transform:rotate(-40deg);transform-origin:left bottom;width:28px;font-size:11.5px}
-.heat td.cat{white-space:nowrap;font-size:13.5px;padding-right:14px;text-transform:capitalize}
-.scale{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink3);margin-top:12px}
-.scale span.sw{display:inline-block;width:22px;height:10px;border-radius:2px}
+.heat td.c{padding:0;height:30px;text-align:center;font-family:var(--mono);font-size:11.5px;border:1px solid var(--bg)}
+.heat th.rot{height:92px;vertical-align:bottom;padding:0 2px 6px;white-space:nowrap;border-bottom:1px solid var(--ink)}
+.heat th.rot span{display:inline-block;transform:rotate(-45deg);transform-origin:left bottom;width:26px;font-size:12px}
+.heat td.cat{white-space:nowrap;padding-right:14px;text-transform:capitalize;color:var(--ink)}
 /* fix list */
-.fix{display:grid;grid-template-columns:44px 1.2fr 1fr 2.4fr;gap:18px;padding:18px 0;border-bottom:1px solid var(--line);align-items:start}
-.fix .rank{font-family:var(--serif);font-size:30px;line-height:1;color:var(--ink3)}
-.fix h4{font-size:16px;font-weight:600}
-.fix .own{font-size:12.5px;color:var(--ink3);margin-top:2px}
-.fix .money{font-family:var(--mono);font-size:15px}
-.fix .money small{display:block;font-size:12px;color:var(--ink3);font-family:var(--sans);margin-top:2px}
-.fix p{font-size:14.5px;color:var(--ink2)}
-.callout{border-left:3px solid var(--warn);background:var(--paper);padding:14px 18px;border-radius:0 8px 8px 0;font-size:15px;margin-top:18px;color:var(--ink2)}
-.callout b{color:var(--ink)}
-footer{margin-top:88px;border-top:1px solid var(--line);padding:36px 0 60px;font-size:14px;color:var(--ink2)}
-footer .cols{display:grid;grid-template-columns:2fr 1fr;gap:32px}
-footer h5{font-size:12px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);font-weight:500;margin-bottom:8px}
-footer ol{padding-left:18px} footer li{margin:4px 0}
-@media (max-width:860px){
-  .tiles{grid-template-columns:1fr 1fr} .grid2,.sec-head,footer .cols{grid-template-columns:1fr} .sec-head{gap:6px}
-  .fix{grid-template-columns:36px 1fr} .fix>p{grid-column:2} .fix .money{grid-column:2}
-  nav .links{display:none} nav .wrap{gap:12px} .vrow{grid-template-columns:120px 1fr 92px} .tbar{grid-template-columns:120px 1fr 50px}
+ol.fixes{padding-left:0;list-style:none;counter-reset:f;margin-top:20px}
+ol.fixes li{counter-increment:f;display:grid;grid-template-columns:34px 1fr;gap:6px 14px;padding:16px 0;border-top:1px solid var(--rule)}
+ol.fixes li::before{content:counter(f);font-weight:600;font-size:22px;color:var(--ink3);line-height:1.2}
+ol.fixes .what{font-weight:600}
+ol.fixes .meta{font-family:var(--sans);font-size:13.5px;color:var(--ink3)}
+ol.fixes p{grid-column:2;margin:4px 0 0;font-size:16.5px;color:var(--ink2)}
+.notes{margin-top:84px;border-top:1px solid var(--ink);padding:20px 0 64px;font-family:var(--sans);font-size:14px;color:var(--ink2)}
+.notes h2{font-family:var(--serif);font-size:20px;margin:0 0 12px}
+.notes ol{padding-left:20px;max-width:720px} .notes li{margin-bottom:8px}
+.sign{margin-top:28px;font-family:var(--serif);font-size:16px;color:var(--ink)}
+@media (max-width:820px){
+  body{font-size:17px} .explore,.two{grid-template-columns:1fr;gap:28px} .detail{border-left:0;padding-left:0;border-top:1px solid var(--rule);padding-top:20px}
+  .top nav a:not(:last-child){display:none} .numbers div{flex-basis:45%} .numbers div:nth-child(3){border-left:0;padding-left:0}
 }
 </style>
 </head>
 <body>
-<nav><div class="wrap">
-  <span class="brand">Review Intelligence</span>
-  <span class="links">
-    <a href="#problems">Problems</a><a href="#when">When</a><a href="#check">Checking the model</a><a href="#where">Where</a><a href="#fix">Fix first</a>
-  </span>
-  <a class="gh" href="https://github.com/abhishek-patnaik/review-intelligence">GitHub ↗</a>
-</div></nav>
+<div class="page">
+<div class="top"><b>Abhishek Patnaik</b><nav><a href="https://github.com/abhishek-patnaik/review-intelligence">Code</a><a href="https://github.com/abhishek-patnaik/review-intelligence/blob/main/REPORT.md">Full report</a><a href="https://abhishekpatnaik.in">abhishekpatnaik.in</a></nav></div>
 
-<header class="wrap">
-  <div class="kicker">Olist marketplace · Brazil · 2016 to 2018</div>
-  <h1>What 40,950 shoppers actually complained about</h1>
-  <p class="lede" id="lede"></p>
-  <div class="tiles" id="tiles"></div>
-</header>
+<h1>What Olist's customers complained about</h1>
+<div class="byline">Abhishek Patnaik, October 2026</div>
 
-<section id="problems" class="wrap">
-  <div class="sec-head"><div class="sec-num">01 · THE PROBLEMS</div><div>
-    <h2>The single biggest problem: the order never arrived</h2>
-    <p>Each review was tagged with every problem it mentions. Pick a problem to see what it costs and read real reviews behind it.</p>
-  </div></div>
-  <div class="grid2">
-    <div class="card"><div id="tbars"></div><div class="hint">Reviews mentioning each problem. A review can mention more than one.</div></div>
-    <div class="card detail" id="detail"></div>
-  </div>
-</section>
+<div class="text" id="intro"></div>
+<div class="numbers" id="numbers"></div>
 
-<section id="when" class="wrap">
-  <div class="sec-head"><div class="sec-num">02 · WHEN IT BROKE</div><div>
-    <h2>After the holiday rush, deliveries fell apart</h2>
-    <p id="when-text"></p>
-  </div></div>
-  <div class="card">
-    <div class="legend"><span><i style="background:var(--ink3)"></i>Any complaint</span><span><i style="background:var(--accent)"></i>Not delivered</span><span><i style="background:var(--warn)"></i>Late delivery</span></div>
-    <div id="line"></div>
-  </div>
-</section>
+<h2>The complaints</h2>
+<div class="text" id="problems-text"></div>
+<div class="explore">
+  <div id="tbars"></div>
+  <div class="detail" id="detail"></div>
+</div>
 
-<section id="check" class="wrap">
-  <div class="sec-head"><div class="sec-num">03 · CHECKING THE MODEL</div><div>
-    <h2>The model never saw a delivery date. It still agrees with them.</h2>
-    <p>A free 7B model running on one consumer GPU makes mistakes, so its answers are checked two ways: against Olist's own delivery records, which needs no labels at all, and against a labelled dev set.</p>
-  </div></div>
-  <div class="grid2">
-    <div class="card"><div style="font-size:14px;font-weight:600;margin-bottom:8px">Orders delivered after the promised date</div><div id="valid"></div></div>
-    <div class="card"><div style="font-size:14px;font-weight:600;margin-bottom:8px">Accuracy on the dev set, before and after writing down the rules</div><div id="evals"></div>
-      <p class="hint" style="margin-top:12px">150 reviews stratified by star rating. Prompt v2 adds the rules from the labelling guide.</p></div>
-  </div>
-</section>
+<h2>It got much worse in early 2018</h2>
+<div class="text" id="when-text"></div>
+<div class="fig" id="line"></div>
+<div class="figcap">Share of written reviews each month that mention any complaint, a missing order or a late one. Months with fewer than 300 written reviews are left out.</div>
 
-<section id="where" class="wrap">
-  <div class="sec-head"><div class="sec-num">04 · WHERE</div><div>
-    <h2>Every category has a delivery problem. Some also have a product problem.</h2>
-    <p>Share of written reviews mentioning each problem, for the 14 categories with the most reviews. Hover a cell for the numbers.</p>
-  </div></div>
-  <div class="card heat"><div id="heat"></div><div class="scale" id="scale"></div></div>
-</section>
+<h2>Can a small model be trusted with this?</h2>
+<div class="text" id="check-text"></div>
+<div class="two">
+  <div class="fig"><div class="fig-title">Orders delivered after the promised date</div><div id="valid"></div>
+    <div class="figcap">Grouped by what the model said about the review. The model only ever saw the review text.</div></div>
+  <div class="fig"><div class="fig-title">Accuracy on the dev set</div><div id="evals"></div>
+    <div class="figcap">150 reviews, 30 per star rating. v2 is the same prompt plus the rules from the labelling guide.<sup><a href="#n2">2</a></sup></div></div>
+</div>
 
-<section id="fix" class="wrap">
-  <div class="sec-head"><div class="sec-num">05 · FIX FIRST</div><div>
-    <h2>Where to start, ranked by the orders each problem touches</h2>
-    <p>Repeat buying is too rare on Olist to rank problems by churn, so the ranking uses the value of affected orders, with the rating damage alongside.</p>
-  </div></div>
-  <div id="fixlist"></div>
-  <div class="callout" id="repeat"></div>
-</section>
+<h2>By category</h2>
+<div class="text" id="where-text"></div>
+<div class="heat" id="heat"></div>
+<div class="figcap">Percent of written reviews in each category that mention each problem. The 14 categories with the most reviews. Hover for counts.</div>
 
-<footer class="wrap">
-  <div class="cols">
-    <div>
-      <h5>How it was built</h5>
-      <ol>
-        <li>40,950 written reviews from the public Olist dataset, in Portuguese.</li>
-        <li>Each one classified into 12 complaint themes by Qwen 2.5 7B, running locally through Ollama, with answers forced into a fixed JSON format.</li>
-        <li>Theme definitions settled in a written labelling guide, and the same rules given to the model.</li>
-        <li>Themes joined to orders, delivery dates, sellers and repeat purchases.</li>
-      </ol>
-      <p style="margin-top:12px">Code, decisions log and full report on <a href="https://github.com/abhishek-patnaik/review-intelligence">GitHub</a>. English translations of example reviews come from an offline translation model.</p>
-    </div>
-    <div>
-      <h5>Made by</h5>
-      <p><b style="color:var(--ink)">Abhishek Patnaik</b><br>Data analyst, Delhi<br><a href="https://abhishekpatnaik.in">abhishekpatnaik.in</a></p>
-    </div>
-  </div>
-</footer>
+<h2>What I would fix first</h2>
+<div class="text" id="fix-text"></div>
+<ol class="fixes" id="fixlist"></ol>
+
+<div class="notes" id="notes">
+  <h2>Notes</h2>
+  <ol>
+    <li id="n1">Data is the public Brazilian E-Commerce dataset Olist released on Kaggle: about 100k orders and 99,224 reviews from 2016 to 2018. Only the 40,950 reviews with written text were classified.</li>
+    <li id="n2">The model is Qwen 2.5 7B served by Ollama on an RTX 4060, with answers limited to a JSON list of 12 theme names. It is wrong some of the time, and the counts here carry that error. The rules for unclear cases, like an order still not delivered after the deadline, are in the <a href="https://github.com/abhishek-patnaik/review-intelligence/blob/main/docs/LABELLING_GUIDE.md">labelling guide</a>.</li>
+    <li id="n3">English versions of the example reviews come from an offline translation model and are sometimes clumsy. Switch to Portuguese to read the originals.</li>
+    <li id="n4">"Value of orders" is the value of orders that drew a complaint. It shows how much business a problem touches, not how much money was lost.</li>
+    <li id="n5">Repeat purchase only counts orders placed at least 180 days before the data ends, so every customer had time to come back.</li>
+  </ol>
+  <p class="sign">Questions or corrections are welcome: <a href="https://abhishekpatnaik.in">abhishekpatnaik.in</a>. The code and every decision behind these numbers are <a href="https://github.com/abhishek-patnaik/review-intelligence">on GitHub</a>.</p>
+</div>
+</div>
 <div class="tip" id="tip"></div>
 
 <script>
@@ -210,120 +157,106 @@ const SHORT={not_delivered:"Not delivered",late_delivery:"Late",missing_items:"M
 not_as_described:"Not as described",poor_quality:"Poor quality",seller_support:"Seller support",refund_return:"Refund",packaging:"Packaging",price_shipping:"Price",other_complaint:"Other"};
 const $=id=>document.getElementById(id);
 const pct=(x,d=0)=>(x*100).toFixed(d)+"%", num=x=>Math.round(x).toLocaleString("en-US");
-const brl=x=>"R$ "+(x>=1e6?(x/1e6).toFixed(2)+"M":Math.round(x/1000)+"k");
+const brl=x=>"R$"+(x>=1e6?(x/1e6).toFixed(2)+" million":num(x/1000)+"k");
 const tip=$("tip");
-function showTip(e,html){tip.innerHTML=html;tip.style.opacity=1;const x=Math.min(e.clientX+14,innerWidth-270);tip.style.left=x+"px";tip.style.top=(e.clientY+14)+"px"}
+function showTip(e,html){tip.innerHTML=html;tip.style.opacity=1;tip.style.left=Math.min(e.clientX+14,innerWidth-270)+"px";tip.style.top=(e.clientY+14)+"px"}
 function hideTip(){tip.style.opacity=0}
-let D, lang="en", shown=6, current="not_delivered";
-
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+let D, lang="en", shown=5, current="not_delivered";
 fetch("data.json").then(r=>r.json()).then(d=>{D=d;render()});
 
 function render(){
-  const s=D.summary, imp=Object.fromEntries(D.impact.map(r=>[r.theme,r]));
-  const v=Object.fromEntries(D.validation.map(r=>[r.group,r]));
-  $("lede").textContent=`${num(s.reviews_with_text)} written reviews from a Brazilian marketplace, each read by a free language model running on one GPU, then joined to orders, delivery dates and sellers. ${pct(s.complaint_share)} of them complain about something. Here is what, when, where, and what to fix first.`;
-  const totalRc=D.impact.reduce((a,r)=>a+r.rating_cost,0);
-  const tiles=[[pct(s.complaint_share),"of written reviews contain a complaint"],
-    [num(imp.not_delivered.reviews),"reviews say the order never arrived, the biggest problem"],
-    [`${pct(v["Tagged late delivery"].delivered_after_estimate)} vs ${pct(v["No complaint"].delivered_after_estimate)}`,"orders actually delivered late, reviews tagged late vs no complaint"],
-    [totalRc.toFixed(2),"stars complaints take off the average rating"]];
-  $("tiles").innerHTML=tiles.map(([n,l])=>`<div class="tile"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
-  themeBars(); detail(); line(); valid(); evals(); heat(); fix();
+  const s=D.summary, imp=Object.fromEntries(D.impact.map(r=>[r.theme,r])), v=Object.fromEntries(D.validation.map(r=>[r.group,r]));
+  const rc=D.impact.reduce((a,r)=>a+r.rating_cost,0);
+  $("intro").innerHTML=`<p>Olist is a Brazilian marketplace that made about 100,000 of its orders public, along with the reviews customers left. ${num(s.reviews_with_text)} of those reviews have a written comment, all in Portuguese. I wanted to know what people were actually unhappy about, so I ran every comment through a small open language model on my own GPU, tagged each problem it mentions, and joined the results back to the orders.<sup><a href="#n1">1</a></sup></p>
+  <p>The short version: <mark>the most common complaint is that the order never arrived</mark>, and a lot of the rest is sellers sending the wrong thing or not enough of it.</p>`;
+  $("numbers").innerHTML=[[pct(s.complaint_share),"of written reviews complain about something"],
+    [num(imp.not_delivered.reviews),"say the order never arrived"],
+    [rc.toFixed(2)+" stars","taken off the average rating by complaints"],
+    [`${pct(v["Tagged late delivery"].delivered_after_estimate)} / ${pct(v["No complaint"].delivered_after_estimate)}`,"of orders really were late, for reviews tagged late vs. no complaint"]]
+    .map(([b,t])=>`<div><b>${b}</b><span>${t}</span></div>`).join("");
+  const fulfil=imp.missing_items.reviews+imp.wrong_item.reviews;
+  $("problems-text").innerHTML=`<p>A review can mention more than one problem, and about a third of the complaining ones do. Delivery leads, but the second group surprised me: ${num(fulfil)} reviews say a piece of the order was missing or the wrong item came. That points at the seller's packing more than the courier.</p><p>Click any problem to see what it costs and read a few of the reviews behind it.</p>`;
+  themeBars(); detail(); line(); check(); heat(); fix();
 }
 
 function themeBars(){
   const rows=[...D.impact].sort((a,b)=>b.reviews-a.reviews), max=rows[0].reviews;
-  $("tbars").innerHTML=rows.map(r=>`<div class="tbar ${r.theme===current?"on":""}" data-t="${r.theme}" tabindex="0">
-    <span>${LABEL[r.theme]}</span><span class="track"><span class="fill" style="width:${100*r.reviews/max}%"></span></span><span class="v">${num(r.reviews)}</span></div>`).join("");
-  document.querySelectorAll(".tbar").forEach(el=>{
-    const go=()=>{current=el.dataset.t;shown=6;themeBars();detail()};
-    el.onclick=go; el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}};
-  });
+  $("tbars").innerHTML=rows.map(r=>`<button class="tbar ${r.theme===current?"on":""}" data-t="${r.theme}">
+    <span>${LABEL[r.theme]}</span><span class="track"><span class="fill" style="width:${100*r.reviews/max}%"></span></span><span class="v">${num(r.reviews)}</span></button>`).join("");
+  document.querySelectorAll(".tbar").forEach(el=>el.onclick=()=>{current=el.dataset.t;shown=5;themeBars();detail()});
 }
-
 function detail(){
-  const r=D.impact.find(x=>x.theme===current), base=D.summary;
+  const r=D.impact.find(x=>x.theme===current), s=D.summary, ex=D.examples[current]||[];
   const def=D.themes.find(t=>t.id===current).definition;
-  const ex=D.examples[current]||[];
-  const repeatTxt=r.repeat_ci_high<base.no_complaint_repeat_ci_low?`${pct(r.repeat_rate,1)}, clearly below ${pct(base.no_complaint_repeat_rate,1)}`:`${pct(r.repeat_rate,1)}, within noise of ${pct(base.no_complaint_repeat_rate,1)}`;
+  const clearlyLower=r.repeat_ci_high<s.no_complaint_repeat_ci_low;
   $("detail").innerHTML=`<h3>${LABEL[current]}</h3><div class="def">${def}.</div>
-  <div class="stats">
-    <div><div class="n">${num(r.reviews)}</div><div class="l">reviews, ${pct(r.share_of_complaints)} of complaints</div></div>
-    <div><div class="n">${r.avg_stars.toFixed(1)} ★</div><div class="l">average, vs ${base.no_complaint_avg_stars.toFixed(1)} with no complaint</div></div>
-    <div><div class="n">${brl(r.order_value)}</div><div class="l">value of the orders behind them</div></div>
-    <div><div class="n">${pct(r.one_star_share)}</div><div class="l">are one star reviews</div></div>
-    <div><div class="n">${r.rating_cost.toFixed(2)}</div><div class="l">stars off the average rating</div></div>
-    <div><div class="n">${pct(r.repeat_rate,1)}</div><div class="l">bought again (${repeatTxt.split(", ")[1]})</div></div>
-  </div>
-  <div class="ex-head"><b>What customers wrote</b><span class="toggle"><button data-l="en" class="${lang==="en"?"on":""}">English</button><button data-l="pt" class="${lang==="pt"?"on":""}">Português</button></span></div>
-  <div class="quotes">${ex.slice(0,shown).map(e=>`<div class="quote"><p>${esc(lang==="en"?(e.en||e.pt):e.pt)}</p><small>${"★".repeat(e.stars)}${"☆".repeat(5-e.stars)}${e.category!=="unknown"?" · "+e.category:""}${e.value?` · R$ ${e.value.toFixed(0)}`:""}</small></div>`).join("")}</div>
-  ${shown<ex.length?`<button class="more" id="more">Show ${Math.min(6,ex.length-shown)} more</button>`:""}`;
-  document.querySelectorAll(".toggle button").forEach(b=>b.onclick=()=>{lang=b.dataset.l;detail()});
-  if($("more"))$("more").onclick=()=>{shown+=6;detail()};
+  <div class="facts"><b>${num(r.reviews)}</b> reviews, ${pct(r.one_star_share)} of them one star. They average <b>${r.avg_stars.toFixed(1)} stars</b>, against ${s.no_complaint_avg_stars.toFixed(1)} for reviews with no complaint, and sit on <b>${brl(r.order_value)}</b> of orders.<sup><a href="#n4">4</a></sup>
+  ${pct(r.repeat_rate,1)} of these customers bought again, ${clearlyLower?`<b>clearly fewer</b> than the ${pct(s.no_complaint_repeat_rate,1)} who had no complaint`:`close enough to the ${pct(s.no_complaint_repeat_rate,1)} with no complaint that I would not read anything into it`}.<sup><a href="#n5">5</a></sup></div>
+  <div class="lang"><button data-l="en" class="${lang==="en"?"on":""}">English</button> / <button data-l="pt" class="${lang==="pt"?"on":""}">Portuguese</button><sup><a href="#n3">3</a></sup></div>
+  ${ex.slice(0,shown).map(e=>`<blockquote>${esc(lang==="en"?(e.en||e.pt):e.pt)}<cite>${e.stars} star${e.stars>1?"s":""}${e.category!=="unknown"?", "+e.category:""}${e.value?`, R$${e.value.toFixed(0)}`:""}</cite></blockquote>`).join("")}
+  ${shown<ex.length?`<button class="more" id="more">More reviews</button>`:""}`;
+  document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.l;detail()});
+  if($("more"))$("more").onclick=()=>{shown+=5;detail()};
 }
-function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 
 function line(){
-  const m=D.monthly, W=1000, H=300, L=44, R=110, T=16, B=32;
+  const m=D.monthly, W=1000, H=300, L=40, R=104, T=18, B=30;
   const x=i=>L+i*(W-L-R)/(m.length-1), y=v=>T+(H-T-B)*(1-v/0.6);
-  const series=[["complaint","var(--ink3)","Any complaint"],["not_delivered","var(--accent)","Not delivered"],["late","var(--warn)","Late delivery"]];
   let g="";
-  [0,.1,.2,.3,.4,.5,.6].forEach(t=>{g+=`<line x1="${L}" x2="${W-R}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)"/><text x="${L-8}" y="${y(t)+4}" text-anchor="end" class="mono">${t*100}%</text>`});
-  m.forEach((d,i)=>{if(i%2===0){const [yy,mm]=d.month.split("-");g+=`<text x="${x(i)}" y="${H-8}" text-anchor="middle">${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+mm-1]} ${yy.slice(2)}</text>`}});
-  series.forEach(([k,c,name])=>{
-    g+=`<polyline fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" points="${m.map((d,i)=>x(i)+","+y(d[k])).join(" ")}"/>`;
-    const last=m[m.length-1]; g+=`<text x="${x(m.length-1)+8}" y="${y(last[k])+4}" style="fill:${c};font-weight:500">${name}</text>`;
+  [0,.2,.4,.6].forEach(t=>{g+=`<line x1="${L}" x2="${W-R}" y1="${y(t)}" y2="${y(t)}" stroke="var(--rule)"/><text x="${L-8}" y="${y(t)+4}" text-anchor="end">${t*100}%</text>`});
+  const mon=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  m.forEach((d,i)=>{const [yy,mm]=d.month.split("-");if(mm==="01"||i===0)g+=`<text x="${x(i)}" y="${H-6}" text-anchor="middle" style="fill:var(--ink2)">${mon[+mm-1]} ${yy}</text>`;else if(i%3===0)g+=`<text x="${x(i)}" y="${H-6}" text-anchor="middle">${mon[+mm-1]}</text>`});
+  [["complaint","var(--ink3)","Any complaint"],["not_delivered","var(--accent)","Never arrived"],["late","var(--warn)","Arrived late"]].forEach(([k,c,n])=>{
+    g+=`<polyline fill="none" stroke="${c}" stroke-width="2" points="${m.map((d,i)=>x(i)+","+y(d[k])).join(" ")}"/>`;
+    g+=`<text x="${x(m.length-1)+8}" y="${y(m[m.length-1][k])+4}" style="fill:${c}">${n}</text>`;
   });
-  const pk=m.reduce((a,d,i)=>d.complaint>m[a].complaint?i:a,0);
-  g+=`<circle cx="${x(pk)}" cy="${y(m[pk].complaint)}" r="4" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
-      <text x="${x(pk)}" y="${y(m[pk].complaint)-12}" text-anchor="middle" style="fill:var(--ink);font-weight:600">${pct(m[pk].complaint)} complain</text>`;
-  g+=`<line id="cross" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--ink3)" stroke-dasharray="3 3" opacity="0"/>`;
-  g+=`<rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="transparent" id="hit"/>`;
-  $("line").innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Monthly share of written reviews with complaints">${g}</svg>`;
-  const svg=$("line").querySelector("svg"), cross=svg.querySelector("#cross");
-  svg.querySelector("#hit").addEventListener("mousemove",e=>{
-    const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(svg.getScreenCTM().inverse());
-    const i=Math.max(0,Math.min(m.length-1,Math.round((q.x-L)/((W-L-R)/(m.length-1))))), d=m[i];
+  const pk=m.reduce((a,d,i)=>d.not_delivered>m[a].not_delivered?i:a,0);
+  g+=`<path d="M${x(pk)+70},${y(m[pk].not_delivered)-34} Q${x(pk)+30},${y(m[pk].not_delivered)-34} ${x(pk)+6},${y(m[pk].not_delivered)-6}" fill="none" stroke="var(--ink2)" stroke-width="1"/>
+      <text x="${x(pk)+74}" y="${y(m[pk].not_delivered)-30}" style="fill:var(--ink2);font-style:italic;font-family:var(--serif);font-size:14px">${pct(m[pk].not_delivered)} said it never came</text>`;
+  g+=`<line id="cross" y1="${T}" y2="${H-B}" stroke="var(--ink3)" stroke-dasharray="2 3" opacity="0"/><rect id="hit" x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="transparent"/>`;
+  $("line").innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Monthly complaint share">${g}</svg>`;
+  const svg=$("line").querySelector("svg"), cross=svg.querySelector("#cross"), hit=svg.querySelector("#hit");
+  hit.onmousemove=e=>{const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(svg.getScreenCTM().inverse());
+    const i=Math.max(0,Math.min(m.length-1,Math.round((q.x-L)/((W-L-R)/(m.length-1))))),d=m[i];
     cross.setAttribute("x1",x(i));cross.setAttribute("x2",x(i));cross.setAttribute("opacity",1);
-    showTip(e,`<b>${d.month}</b> · ${num(d.reviews)} written reviews<br>Any complaint ${pct(d.complaint)}<br>Not delivered ${pct(d.not_delivered)}<br>Late delivery ${pct(d.late)}`);
-  });
-  svg.querySelector("#hit").addEventListener("mouseleave",()=>{cross.setAttribute("opacity",0);hideTip()});
-  const pkm=m[pk], before=m.filter(d=>d.month<"2017-11"), avgB=before.reduce((a,d)=>a+d.not_delivered,0)/before.length;
-  $("when-text").textContent=`Through most of 2017, about ${pct(avgB)} of written reviews said the order never came. After the December rush it climbed, peaking in ${monthName(pkm.month)} at ${pct(pkm.not_delivered)}, when ${pct(pkm.complaint)} of all written reviews complained about something. By mid 2018 it was back to normal.`;
+    showTip(e,`${monthName(d.month)}, ${num(d.reviews)} reviews<br>Any complaint ${pct(d.complaint)}<br>Never arrived ${pct(d.not_delivered)}<br>Arrived late ${pct(d.late)}`)};
+  hit.onmouseleave=()=>{cross.setAttribute("opacity",0);hideTip()};
+  const before=m.filter(d=>d.month<"2017-11"), base=before.reduce((a,d)=>a+d.not_delivered,0)/before.length, p=m[pk];
+  $("when-text").innerHTML=`<p>For most of 2017, around ${pct(base)} of written reviews said the order never showed up. Orders jumped in late November and December 2017, and a couple of months later that share more than doubled, peaking at ${pct(p.not_delivered)} in ${monthName(p.month)}. That month ${pct(p.complaint)} of everyone who wrote a review was complaining about something. By the middle of 2018 it had settled back down.</p>
+  <p>I can only see this from the reviews, so I can't say for sure what went wrong inside the delivery network. But the timing looks like a holiday backlog that took a few months to clear.</p>`;
 }
 function monthName(s){const [y,m]=s.split("-");return ["January","February","March","April","May","June","July","August","September","October","November","December"][+m-1]+" "+y}
 
-function valid(){
+function check(){
+  const v=Object.fromEntries(D.validation.map(r=>[r.group,r])), e=D.evals;
+  $("check-text").innerHTML=`<p>A 7B model on a gaming GPU is not going to be perfect, so I checked it two ways.</p>
+  <p>The first needs no labels at all. The model never saw delivery dates, only the review text, but Olist recorded when each order was promised and when it actually arrived. If the model reads delivery complaints properly, the reviews it calls "late" should belong to orders that really were late. ${pct(v["Tagged late delivery"].delivered_after_estimate)} of them were, against ${pct(v["No complaint"].delivered_after_estimate)} of orders behind reviews with no complaint.</p>
+  <p>The second is a labelled dev set. My first prompt got ${e.v1?pct(e.v1.exact_match):"most"} of reviews exactly right. Writing down rules for the confusing cases and adding them to the prompt took it to ${e.v2?pct(e.v2.exact_match):"more"}. It still over-uses "refund" for people who only ask for their money back, and rarely picks "other".</p>`;
   const max=Math.max(...D.validation.map(r=>r.delivered_after_estimate));
   $("valid").innerHTML=D.validation.map(r=>{const t=r.group.startsWith("Tagged");
-    return `<div class="vrow"><span>${r.group}</span><span class="track"><span class="fill" style="display:block;width:${100*r.delivered_after_estimate/max}%;background:${t?"var(--accent)":"var(--ink3)"};opacity:${t?1:.55}"></span></span><span class="v">${pct(r.delivered_after_estimate)} · ${num(r.reviews)}</span></div>`}).join("")+
-    `<p class="hint">Of reviews tagged not delivered, ${pct(D.validation[1].no_delivery_date)} belong to orders that never got a delivery date at all.</p>`;
-}
-function evals(){
-  const e=D.evals; if(!e.v1){$("evals").innerHTML="<p class='hint'>Not available.</p>";return}
-  const rows=[["Exact match (every theme right)","exact_match",1],["Micro F1","micro_f1",0],["Macro F1","macro_f1",0],["Spots whether it is a complaint","complaint_detection_accuracy",1]];
-  $("evals").innerHTML=`<table><tr><th></th><th class="num">v1</th><th class="num">v2</th></tr>${rows.map(([n,k,p])=>`<tr><td>${n}</td><td class="num">${p?pct(e.v1[k]):e.v1[k].toFixed(2)}</td><td class="num" style="color:var(--ink);font-weight:500">${p?pct(e.v2[k]):e.v2[k].toFixed(2)}</td></tr>`).join("")}</table>`;
+    return `<div class="vrow"><span>${r.group}</span><span class="track"><span class="fill" style="display:block;width:${100*r.delivered_after_estimate/max}%;background:${t?"var(--accent)":"var(--ink3)"}"></span></span><span class="v">${pct(r.delivered_after_estimate)}</span></div>`}).join("");
+  if(e.v1){const rows=[["Every theme right","exact_match",1],["Micro F1","micro_f1",0],["Macro F1","macro_f1",0],["Complaint or not","complaint_detection_accuracy",1]];
+    $("evals").innerHTML=`<table><tr><th></th><th class="n">v1</th><th class="n">v2</th></tr>${rows.map(([n,k,p])=>`<tr><td>${n}</td><td class="n">${p?pct(e.v1[k]):e.v1[k].toFixed(2)}</td><td class="n" style="color:var(--ink)">${p?pct(e.v2[k]):e.v2[k].toFixed(2)}</td></tr>`).join("")}</table>`}
 }
 function heat(){
   const th=D.themes.map(t=>t.id).filter(t=>t!=="other_complaint");
   const steps=["--b1","--b2","--b3","--b4","--b5","--b6","--b7"], cuts=[.02,.04,.06,.08,.11,.15];
-  const col=v=>`var(${steps[cuts.findIndex(c=>v<c)<0?6:cuts.findIndex(c=>v<c)]})`;
-  const txt=v=>v>=.08?"#fff":"var(--ink)";
-  let h=`<table><tr><th></th>${th.map(t=>`<th class="rot"><span>${SHORT[t]}</span></th>`).join("")}<th class="num">Any</th></tr>`;
-  D.categories.forEach(c=>{h+=`<tr><td class="cat">${c.category}</td>${th.map(t=>{const v=c.rates[t];
-      return `<td class="c" style="background:${col(v)};color:${txt(v)}" data-tip="<b>${c.category}</b><br>${LABEL[t]}: ${pct(v,1)} of ${num(c.reviews)} reviews">${(v*100).toFixed(0)}</td>`}).join("")}<td class="num">${pct(c.complaint_rate)}</td></tr>`});
+  const idx=v=>{const i=cuts.findIndex(c=>v<c);return i<0?6:i};
+  let h=`<table><tr><th></th>${th.map(t=>`<th class="rot"><span>${SHORT[t]}</span></th>`).join("")}<th class="n" style="vertical-align:bottom">All</th></tr>`;
+  D.categories.forEach(c=>{h+=`<tr><td class="cat">${c.category}</td>${th.map(t=>{const v=c.rates[t],i=idx(v);
+    return `<td class="c" style="background:var(${steps[i]});color:${i>=4?"#fff":"var(--ink)"}" data-tip="${c.category}: ${LABEL[t].toLowerCase()} in ${pct(v,1)} of ${num(c.reviews)} reviews">${Math.round(v*100)}</td>`}).join("")}<td class="n">${pct(c.complaint_rate)}</td></tr>`});
   $("heat").innerHTML=h+"</table>";
   $("heat").querySelectorAll("td.c").forEach(td=>{td.onmousemove=e=>showTip(e,td.dataset.tip);td.onmouseleave=hideTip});
-  $("scale").innerHTML="Share of reviews: "+["<2%","2-4%","4-6%","6-8%","8-11%","11-15%","15%+"].map((l,i)=>`<span class="sw" style="background:var(${steps[i]})"></span>${l}`).join(" ");
+  const by=k=>[...D.categories].sort((a,b)=>b.rates[k]-a.rates[k])[0];
+  const pq=by("poor_quality"), mi=by("missing_items");
+  $("where-text").innerHTML=`<p>Not arriving is a problem everywhere, at roughly one review in ten in every big category. The differences are in the product columns. ${cap(pq.category)} has the highest share of poor quality complaints (${pct(pq.rates.poor_quality)}), and ${mi.category} the most missing items (${pct(mi.rates.missing_items)}), which makes sense for things that ship as several pieces.</p>`;
 }
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
 function fix(){
-  $("fixlist").innerHTML=D.fix.slice(0,6).map((r,i)=>`<div class="fix"><div class="rank">${i+1}</div>
-    <div><h4>${LABEL[r.theme]}</h4><div class="own">${r.owner}</div></div>
-    <div class="money">${brl(r.order_value)}<small>${num(r.reviews)} reviews · ${r.rating_cost.toFixed(2)} stars off</small></div>
-    <p>${r.action}.</p></div>`).join("");
-  const s=D.summary, low=D.impact.filter(r=>r.repeat_ci_high<s.no_complaint_repeat_ci_low);
-  $("repeat").innerHTML=low.length?`<b>Only ${low.map(r=>LABEL[r.theme].toLowerCase()).join(" and ")} clearly cost repeat customers.</b> ${low.map(r=>pct(r.repeat_rate,1)).join(", ")} bought again, against ${pct(s.no_complaint_repeat_rate,1)} with no complaint. Every other problem is within noise.`
-    :`<b>No complaint clearly changed repeat buying.</b>`;
+  const s=D.summary;
+  $("fix-text").innerHTML=`<p>My first plan was to rank problems by how many customers they drive away. That didn't work: only about ${pct(s.no_complaint_repeat_rate)} of Olist customers ever order again, so there is too little repeat buying to measure. Late delivery is the one complaint where returning customers clearly drop. So the list below is ordered by the value of the orders each problem touches, with what I would try first.</p>`;
+  $("fixlist").innerHTML=D.fix.slice(0,6).map(r=>`<li><div><span class="what">${LABEL[r.theme]}</span> <span class="meta">${r.owner.toLowerCase()}, ${num(r.reviews)} reviews, ${brl(r.order_value)} of orders</span></div><p>${r.action}.</p></li>`).join("");
 }
 </script>
 </body>
