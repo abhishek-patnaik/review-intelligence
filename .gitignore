@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# the Olist CSVs are downloaded by `python -m reviews fetch`, never committed
+data/raw/
+data/interim/
+# LLM responses are cached locally so reruns are free; rebuilt by the pipeline
+data/cache/
+# rebuilt by the pipeline
+outputs/data/
+outputs_synthetic/

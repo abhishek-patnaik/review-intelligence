@@ -1,0 +1,39 @@
+# Project configuration. Every judgement call lives here, not hidden in the
+# code, so it can be argued with and changed.
+
+[data]
+# Brazilian E-Commerce Public Dataset by Olist (about 100k orders, 2016 to 2018).
+raw_dir = "data/raw"
+
+[llm]
+# Served locally by Ollama, so the whole project runs at zero cost.
+host = "http://localhost:11434"
+model = "qwen2.5:7b"
+temperature = 0
+random_seed = 42
+
+[labels]
+# Reviews I label by hand to measure how often the model is right.
+sample_size = 500
+random_seed = 42
+
+[data.files]
+# Only the tables this project needs. Geolocation and sellers are left out.
+orders = "olist_orders_dataset.csv"
+reviews = "olist_order_reviews_dataset.csv"
+customers = "olist_customers_dataset.csv"
+items = "olist_order_items_dataset.csv"
+payments = "olist_order_payments_dataset.csv"
+products = "olist_products_dataset.csv"
+categories = "product_category_name_translation.csv"
+
+[data.expected_rows]
+# Row counts published with the Kaggle release. The loader refuses to continue
+# if a file does not match, so a partial or different download fails loudly.
+orders = 99441
+reviews = 99224
+customers = 99441
+items = 112650
+payments = 103886
+products = 32951
+categories = 71

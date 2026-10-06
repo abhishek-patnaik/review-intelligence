@@ -1,0 +1,11 @@
+[project]
+name = "review-intelligence"
+version = "0.1.0"
+description = "Classifying real ecommerce reviews with a local open LLM, measuring its accuracy, and pricing what each complaint costs"
+requires-python = ">=3.10"
+authors = [{ name = "Abhishek Patnaik" }]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]

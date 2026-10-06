@@ -1,0 +1,17 @@
+# core
+pandas>=2.2
+numpy>=1.26
+scipy>=1.11
+matplotlib>=3.8
+pyarrow>=14
+scikit-learn>=1.4
+tomli>=2.0; python_version < "3.11"
+
+# talking to the local model served by Ollama
+requests>=2.31
+
+# tests
+pytest>=8.0
+
+# the walkthrough notebook (optional)
+jupyterlab>=4.0
