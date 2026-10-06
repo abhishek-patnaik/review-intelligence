@@ -13,7 +13,7 @@ temperature = 0
 random_seed = 42
 # Bump this whenever the prompt changes, so cached answers from an older
 # prompt are never mixed with new ones.
-prompt_version = "v1"
+prompt_version = "v2"
 timeout_seconds = 120
 # Reviews sent to Ollama at once. Match it to OLLAMA_NUM_PARALLEL on the
 # Ollama side, or the extra requests just queue.

@@ -11,15 +11,39 @@ import pandas as pd
 from reviews import labels as lab
 
 
-def classify_many(clf, texts: list[str], workers: int, progress: bool = True) -> list[list[str]]:
+def classify_many(clf, texts: list[str], workers: int, progress: bool = True,
+                  report_every: int = 0, started: float | None = None) -> list[list[str]]:
+    import time
+    from concurrent.futures import as_completed
+
     out: list[list[str] | None] = [None] * len(texts)
+    started = started or time.time()
+    failures = 0
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(clf.classify, t): i for i, t in enumerate(texts)}
-        for n, fut in enumerate(futures, 1):
-            out[futures[fut]] = fut.result()
+        futures = {pool.submit(_safe, clf, t): i for i, t in enumerate(texts)}
+        for n, fut in enumerate(as_completed(futures), 1):
+            res = fut.result()
+            if res is None:
+                failures += 1
+                res = []
+            out[futures[fut]] = res
             if progress and (n % 25 == 0 or n == len(texts)):
                 print(f"  {n}/{len(texts)}", flush=True)
+            if report_every and (n % report_every == 0 or n == len(texts)):
+                el = time.time() - started
+                eta = el / n * (len(texts) - n)
+                print(f"  {n:,}/{len(texts):,}  elapsed {el / 60:.0f} min  about {eta / 60:.0f} min left"
+                      f"{f'  ({failures} failed, will retry next run)' if failures else ''}", flush=True)
     return out  # type: ignore[return-value]
+
+
+def _safe(clf, text):
+    """One failed request (a timeout, say) should not stop an hours long run.
+    Failures are not cached, so the next run retries them."""
+    try:
+        return clf.classify(text)
+    except Exception:
+        return None
 
 
 def to_matrix(theme_lists, themes: list[str]) -> np.ndarray:

@@ -6,6 +6,8 @@
     python -m reviews label            open the labelling tool in the browser
     python -m reviews label --test     label only the 100 hand labelled test reviews
     python -m reviews evaluate         score the model on the dev split while tuning the prompt
+    python -m reviews classify         classify every review with text (hours; resumable)
+    python -m reviews overnight        dev scores for prompt v1 and v2, then the full classification
 """
 
 from __future__ import annotations
@@ -79,24 +81,29 @@ def cmd_label(args) -> None:
 
 
 def cmd_evaluate(args) -> None:
+    cfg = load_config()
+    if args.model:
+        cfg["llm"]["model"] = args.model
+    if args.split in ("test", "human_test") and not args.confirm_test:
+        raise SystemExit("The test split is scored once, at the very end. Add --confirm-test if that is now.")
+    run_eval(cfg, args.split, args.labels)
+
+
+def run_eval(cfg: dict, split: str, label_source: str) -> dict:
     import json
 
     from reviews import evaluate as ev
     from reviews.config import paths_for
     from reviews.llm import Classifier
 
-    cfg = load_config()
-    if args.model:
-        cfg["llm"]["model"] = args.model
     clf = Classifier(cfg)
     clf.check()
-    df = ev.load_truth(args.labels)
-    if args.split == "human_test":
+    df = ev.load_truth(label_source)
+    if split == "human_test":
         df = df[df.human_test.astype(int) == 1]
-    elif args.split != "all":
-        df = df[df.split == args.split]
-    if args.split in ("test", "human_test") and not args.confirm_test:
-        raise SystemExit("The test split is scored once, at the very end. Add --confirm-test if that is now.")
+    elif split != "all":
+        df = df[df.split == split]
+    args = argparse.Namespace(split=split, labels=label_source)
     themes = list(cfg["themes"])
     print(f"Scoring {cfg['llm']['model']} (prompt {cfg['llm']['prompt_version']}) on "
           f"{len(df)} {args.split} reviews against {args.labels} labels")
@@ -115,6 +122,81 @@ def cmd_evaluate(args) -> None:
     print(table.round(2).to_string(index=False))
     print("\n" + "\n".join(f"  {k}: {v:.3f}" if isinstance(v, float) else f"  {k}: {v}" for k, v in summary.items()))
     print(f"\n{len(errors)} reviews where model and labels differ, saved to outputs/tables/errors_{tag}.csv")
+    return summary
+
+
+def cmd_classify(args) -> None:
+    """Classifies every review with text and saves the result. Safe to stop
+    and restart: finished reviews come from the cache."""
+    from reviews import evaluate as ev
+    from reviews import labels
+    from reviews.config import paths_for
+    from reviews.llm import Classifier
+
+    cfg = load_config()
+    clf = Classifier(cfg)
+    clf.check()
+    raw = data.load_raw(cfg)
+    r = raw["reviews"]
+    r = r[r.review_comment_message.notna()].copy()
+    r["text"] = r.review_comment_message.map(labels.clean_text)
+    r = r[r.text.str.len() > 0]
+    unique = r.text.drop_duplicates().tolist()
+    todo = sum(1 for t in unique if clf._key(t) not in clf.cache)
+    print(f"{len(r):,} reviews with text, {len(unique):,} distinct texts, {todo:,} not classified yet "
+          f"({cfg['llm']['model']}, prompt {cfg['llm']['prompt_version']}, {cfg['llm'].get('workers', 1)} at a time)")
+    start = time.time()
+    out = ev.classify_many(clf, unique, cfg["llm"].get("workers", 1), progress=False, report_every=500, started=start)
+    # read back from the cache, so a request that failed stays missing
+    # instead of being recorded as "no complaint"
+    themes = {t: (";".join(clf.cache[clf._key(t)]) if clf._key(t) in clf.cache else None) for t in unique}
+    r["themes"] = r.text.map(themes)
+    missing = r.themes.isna().sum()
+    if missing:
+        print(f"  {missing:,} reviews failed and are left empty. Run the same command again to retry them.")
+    r["model"], r["prompt_version"] = cfg["llm"]["model"], cfg["llm"]["prompt_version"]
+    cols = ["review_id", "order_id", "review_score", "review_creation_date", "text", "themes", "model", "prompt_version"]
+    path = paths_for("real").data / "review_themes.parquet"
+    r[cols].to_parquet(path, index=False)
+    print(f"Done in {(time.time() - start) / 3600:.1f} h. Saved {len(r):,} rows to {path.relative_to(labels.ROOT)}")
+
+
+def cmd_overnight(args) -> None:
+    """One command to leave running: baseline score, improved prompt score,
+    then the full classification. Everything is also written to a log file."""
+    import sys
+
+    from reviews.config import paths_for
+
+    log = paths_for("real").reports / "overnight_log.txt"
+
+    class Tee:
+        def __init__(self, *streams):
+            self.streams = streams
+
+        def write(self, s):
+            for st in self.streams:
+                st.write(s)
+                st.flush()
+
+        def flush(self):
+            for st in self.streams:
+                st.flush()
+
+    with open(log, "a", encoding="utf-8") as fh:
+        sys.stdout = Tee(sys.__stdout__, fh)
+        try:
+            print(f"\n===== overnight run started {time.strftime('%Y-%m-%d %H:%M')} =====")
+            for version in ("v1", "v2"):
+                cfg = load_config()
+                cfg["llm"]["prompt_version"] = version
+                print(f"\n--- dev score, prompt {version} ---")
+                run_eval(cfg, "dev", "working")
+            print("\n--- full classification ---")
+            cmd_classify(args)
+            print(f"===== finished {time.strftime('%Y-%m-%d %H:%M')} =====")
+        finally:
+            sys.stdout = sys.__stdout__
 
 
 def main() -> None:
@@ -137,5 +219,7 @@ def main() -> None:
     s.add_argument("--model", default=None, help="override the model in config.toml")
     s.add_argument("--confirm-test", action="store_true")
     s.set_defaults(func=cmd_evaluate)
+    sub.add_parser("classify").set_defaults(func=cmd_classify)
+    sub.add_parser("overnight").set_defaults(func=cmd_overnight)
     args = p.parse_args()
     args.func(args)
