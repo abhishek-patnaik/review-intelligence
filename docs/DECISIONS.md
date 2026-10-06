@@ -25,3 +25,11 @@ A plain random sample would be about 58% five star reviews, which rarely complai
 ## 6. I label from an independent translation
 
 I do not read Portuguese, so the labelling tool shows each review with an English translation from Argos Translate, an offline model unrelated to the classifier. If the classifier translated for me, its reading of a review would leak into the labels used to judge it. Labelling is blind: the tool never shows the model's answer.
+
+## 7. A written labelling guide, shared by the labels and the prompt
+
+Labelling the first reviews showed that the one line theme definitions did not settle common cases. Is a customer still waiting after the deadline "late" or "not delivered"? Is "bought two, got one" a missing item or a delivery problem? The translation also misled me once: "suporte" means a mount or stand, not customer support. I wrote docs/LABELLING_GUIDE.md to settle these, and the classifier prompt follows the same rules, so the model is judged against the definitions it was given.
+
+## 8. The headline accuracy comes from a hand labelled test set
+
+I hand label a fixed set of 100 test reviews (20 per star rating), blind to the model's answers, and report the model's accuracy against those. A separate dev split is used only to iterate on the prompt, so the test set never shapes the prompt it is scoring.
