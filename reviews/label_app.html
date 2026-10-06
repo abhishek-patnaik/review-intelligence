@@ -59,6 +59,7 @@ footer .bar{align-items:center}
   <div class="row">
     <button class="btn" id="none"><kbd>Space</kbd>No complaint</button>
     <button class="btn" id="unsure"><kbd>U</kbd>Unsure</button>
+    <button class="btn" id="gt"><kbd>G</kbd>Check in Google Translate</button>
     <input class="note" id="note" placeholder="Note (optional, press N)">
   </div>
 </main>
@@ -106,6 +107,7 @@ async function save(){
   progress(); toast(picked.size?[...picked].join(", "):"no complaint");
   if(i<items.length-1){i++;render()} else toast("That was the last one");
 }
+function openGT(){window.open("https://translate.google.com/?sl=pt&tl=en&op=translate&text="+encodeURIComponent(items[i].pt),"gt")}
 function jump(){const k=items.findIndex(x=>!x.label);if(k<0)toast("Everything is labelled");else{i=k;render()}}
 
 document.addEventListener("keydown",e=>{
@@ -121,10 +123,11 @@ document.addEventListener("keydown",e=>{
   else if(k==="u"){unsure=!unsure;paint()}
   else if(k==="n"){e.preventDefault();$("note").focus()}
   else if(k==="j")jump();
+  else if(k==="g")openGT();
   else if(e.key==="ArrowLeft"&&i>0){i--;render()}
   else if(e.key==="ArrowRight"&&i<items.length-1){i++;render()}
 });
-$("save").onclick=save; $("jump").onclick=jump;
+$("gt").onclick=openGT; $("save").onclick=save; $("jump").onclick=jump;
 $("prev").onclick=()=>{if(i>0){i--;render()}};
 $("none").onclick=()=>{picked.clear();paint()};
 $("unsure").onclick=()=>{unsure=!unsure;paint()};

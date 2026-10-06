@@ -56,14 +56,31 @@ class Translator:
         for start in range(0, len(pieces), batch_size):
             chunk = pieces[start:start + batch_size]
             tokens = [self.sp.encode(s, out_type=str) for s in chunk]
-            results = self.model.translate_batch(tokens, beam_size=2, max_decoding_length=256)
-            out_pieces += [self.sp.decode(r.hypotheses[0]) for r in results]
+            results = self.model.translate_batch(tokens, beam_size=4, max_decoding_length=256)
+            out_pieces += [detokenize(r.hypotheses[0]) for r in results]
         joined = [""] * len(texts)
         for i, s in zip(owner, out_pieces):
             joined[i] = (joined[i] + " " + s).strip()
         return joined
 
 
+def detokenize(tokens: list[str]) -> str:
+    """The model's output pieces mark word starts with U+2581; joining them
+    and turning that mark into a space gives plain text."""
+    return "".join(tokens).replace("\u2581", " ").strip()
+
+
+def soften_caps(text: str) -> str:
+    """Reviews typed in capitals translate badly (the model has seen few of
+    them), so mostly upper case text is turned into sentence case first."""
+    letters = [c for c in text if c.isalpha()]
+    if letters and sum(c.isupper() for c in letters) / len(letters) > 0.6:
+        text = text.lower()
+        text = re.sub(r"(^|[.!?]\s+)([a-z\u00e0-\u00ff])", lambda m: m.group(1) + m.group(2).upper(), text)
+    return text
+
+
 def split_sentences(text: str) -> list[str]:
-    parts = re.split(r"(?<=[.!?])\s+", " ".join(text.split()))
+    text = soften_caps(" ".join(text.split()))
+    parts = re.split(r"(?<=[.!?])\s+", text)
     return [p for p in parts if p] or [text]
