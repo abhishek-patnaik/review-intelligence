@@ -15,3 +15,7 @@ outputs/data/
 outputs_synthetic/
 # internal working labels used to tune the prompt on the dev split, not published
 data/labels/reference_labels.csv
+# run logs and per review error lists stay local
+outputs/reports/overnight_log.txt
+outputs/tables/errors_*.csv
+outputs/tables/eval_*_working.*
