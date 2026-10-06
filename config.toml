@@ -16,8 +16,13 @@ random_seed = 42
 prompt_version = "v2"
 timeout_seconds = 120
 # Reviews sent to Ollama at once. Match it to OLLAMA_NUM_PARALLEL on the
-# Ollama side, or the extra requests just queue.
-workers = 4
+# Ollama side, or the extra requests just queue. 8 fits an 8 GB GPU with a 7B model.
+workers = 8
+# Context window per request. Prompt plus the longest review fits well inside
+# 2048 tokens, and a smaller window leaves GPU memory for more parallel slots.
+num_ctx = 2048
+# The answer is a short JSON list, so generation is capped.
+num_predict = 64
 
 [labels]
 # Reviews I label by hand to measure how often the model is right.

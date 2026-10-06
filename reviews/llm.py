@@ -86,7 +86,8 @@ class Classifier:
         llm = cfg["llm"]
         self.host = llm["host"].rstrip("/")
         self.model = llm["model"]
-        self.options = {"temperature": llm["temperature"], "seed": llm["random_seed"]}
+        self.options = {"temperature": llm["temperature"], "seed": llm["random_seed"],
+                        "num_ctx": llm.get("num_ctx", 2048), "num_predict": llm.get("num_predict", 64)}
         self.timeout = llm.get("timeout_seconds", 120)
         self.version = llm["prompt_version"]
         self.themes: dict[str, str] = cfg["themes"]
@@ -145,6 +146,7 @@ class Classifier:
                 "format": _schema(list(self.themes)),
                 "options": self.options,
                 "stream": False,
+                "keep_alive": "30m",
             },
             timeout=self.timeout,
         )

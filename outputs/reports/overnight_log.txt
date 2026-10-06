@@ -1,0 +1,8 @@
+
+===== overnight run started 2026-10-06 07:51 =====
+
+--- dev score, prompt v1 ---
+Scoring qwen2.5:7b (prompt v1) on 150 dev reviews against working labels
+  25/150
+  50/150
+  75/150
