@@ -9,6 +9,7 @@
     python -m reviews classify         classify every review with text (hours; resumable)
     python -m reviews overnight        dev scores for prompt v1 and v2, then the full classification
     python -m reviews report           tables, charts, REPORT.md and the README findings
+    python -m reviews webdata          data.json for the explorer site in app/
 """
 
 from __future__ import annotations
@@ -229,6 +230,21 @@ def cmd_report(args) -> None:
           f"{' (partial run)' if partial else ''}")
 
 
+def cmd_webdata(args) -> None:
+    import pandas as pd
+
+    from reviews import webdata
+    from reviews.config import ROOT, paths_for
+    from reviews.translate import Translator
+
+    cfg = load_config()
+    raw = data.load_raw(cfg)
+    rt = pd.read_parquet(paths_for("real").data / "review_themes.parquet")
+    out = ROOT / "app" / "data.json"
+    webdata.build(cfg, raw, dict(zip(rt.text, rt.themes)), out, translate=Translator(cfg).translate)
+    print(f"Wrote {out.relative_to(ROOT)} ({out.stat().st_size // 1024} KB)")
+
+
 def main() -> None:
     p = argparse.ArgumentParser(prog="reviews")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -254,5 +270,6 @@ def main() -> None:
     s = sub.add_parser("report")
     s.add_argument("--partial", action="store_true", help="use whatever is classified so far")
     s.set_defaults(func=cmd_report)
+    sub.add_parser("webdata").set_defaults(func=cmd_webdata)
     args = p.parse_args()
     args.func(args)
