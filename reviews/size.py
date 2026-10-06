@@ -82,6 +82,8 @@ def theme_impact(reviews: pd.DataFrame, orders: pd.DataFrame, themes: list[str],
         "no_complaint_avg_stars": float(base.review_score.mean()),
         "no_complaint_repeat_rate": float(base_rep.bought_again.mean()),
         "no_complaint_repeat_n": len(base_rep),
+        "no_complaint_repeat_ci_low": wilson(base_rep.bought_again.mean(), len(base_rep))[0],
+        "no_complaint_repeat_ci_high": wilson(base_rep.bought_again.mean(), len(base_rep))[1],
         "complaint_order_value": float(t.loc[t.complaint, "order_value"].sum()),
         "all_order_value": float(orders.order_value.sum()),
     }
@@ -108,7 +110,7 @@ def validation(t: pd.DataFrame) -> pd.DataFrame:
 
 def by_segment(t: pd.DataFrame, col: str, theme: str, min_reviews: int = 150, top: int = 10) -> pd.DataFrame:
     """Complaint rate for one theme by category or seller, among segments with enough reviews."""
-    g = t.groupby(col).agg(reviews=(theme, "size"), hits=(theme, "sum"))
+    g = t[t[col] != "unknown"].groupby(col).agg(reviews=(theme, "size"), hits=(theme, "sum"))
     g = g[g.reviews >= min_reviews]
     g["rate"] = g.hits / g.reviews
     return g.sort_values("rate", ascending=False).head(top).reset_index()

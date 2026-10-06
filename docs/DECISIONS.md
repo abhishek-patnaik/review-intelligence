@@ -36,7 +36,7 @@ I hand label a fixed set of 100 test reviews (20 per star rating), blind to the 
 
 ## 9. Problems are ranked by the orders and ratings they touch, not by churn
 
-I planned to size each complaint by the repeat purchases it costs. The data does not support that: customers with no complaint buy again about 5% of the time, and every complaint theme sits within its confidence interval. Reporting a "revenue lost to churn" figure from noise would be invented precision. So the fix list ranks themes by the value of the orders behind them, and shows how many stars each takes off the average rating. A review that mentions two problems has its rating shortfall split between them, so overlapping themes are not counted twice.
+I planned to size each complaint by the repeat purchases it costs. The data mostly does not support that. Customers with no complaint buy again about 4% of the time, and for all but one theme the repeat rate's 95% interval overlaps that. The exception is late delivery, where customers came back clearly less often. Even there the number of lost returning customers is small, because repeat buying is rare to begin with, so a "revenue lost to churn" ranking would mostly rank noise. So the fix list ranks themes by the value of the orders behind them, and shows how many stars each takes off the average rating. A review that mentions two problems has its rating shortfall split between them, so overlapping themes are not counted twice.
 
 ## 10. An outside check on the classifier that needs no labels
 

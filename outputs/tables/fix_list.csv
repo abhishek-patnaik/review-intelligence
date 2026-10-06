@@ -1,0 +1,12 @@
+theme,owner,reviews,order_value,avg_stars,rating_cost,action
+not_delivered,Logistics,4597,730095.1799999999,1.4874918425059822,0.28697138170143494,Proactive alert and re-ship when a parcel stalls past the estimate; review carriers with the most stalled parcels
+missing_items,Seller fulfilment,2455,523903.87,1.854989816700611,0.12876213207596188,Pick and pack check for multi-unit orders; flag sellers who split shipments without telling the customer
+seller_support,Seller operations,2314,426037.1,1.5064822817631807,0.10318155546679483,Response time target for sellers; tracking code sent automatically at dispatch
+poor_quality,Catalogue,3463,422851.14,2.8625469246318223,0.11485467487595148,Review the lowest rated products in the worst categories with their sellers
+wrong_item,Seller fulfilment,1681,265688.49,1.7709696609161214,0.08009763382303275,"Variant (colour, size, voltage) check at packing for the sellers with the most wrong items"
+late_delivery,Logistics,1815,262075.83000000002,2.659504132231405,0.072679240922592,Set delivery estimates from real carrier times per route instead of a fixed promise
+refund_return,Customer service,1541,255972.08000000002,1.5489941596365997,0.0706605364936482,Clear return flow with a refund deadline
+not_as_described,Catalogue,1806,252664.51,2.1705426356589146,0.0709113247863248,"Listing audit for the worst categories: photos, materials, 'original' claims"
+damaged_defective,Seller and logistics,1276,192240.87,1.933385579937304,0.05865861081885018,Packaging standard for fragile categories; quality check sellers with repeat defect complaints
+price_shipping,Pricing,651,98050.15000000001,2.89247311827957,0.0178833773348401,Combine shipping for multi-item orders from one seller
+packaging,Seller fulfilment,588,93868.98999999999,2.7840136054421767,0.016622293609660634,Minimum packaging rules per category

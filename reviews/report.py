@@ -55,7 +55,7 @@ def chart_themes(table: pd.DataFrame, base_stars: float, path) -> None:
     a1.set_title("Reviews mentioning the complaint", loc="left", fontsize=10.5, color=INK, pad=10)
     a2.barh(labels, d.avg_stars, color=ACCENT, height=0.62)
     a2.axvline(base_stars, color=INK2, linestyle=(0, (3, 3)), linewidth=1)
-    a2.text(base_stars - 0.08, -0.9, f"no complaint {base_stars:.1f}", fontsize=8, color=INK2, ha="right", va="center")
+    a2.text(base_stars - 0.08, len(d) - 0.45, f"no complaint {base_stars:.1f}", fontsize=8, color=INK2, ha="right", va="center")
     for y, v in enumerate(d.avg_stars):
         a2.text(v, y, f"  {v:.1f}", va="center", fontsize=8.5, color=INK2)
     a2.set_xlim(0, 5.4)
@@ -150,8 +150,6 @@ def findings_md(cfg, table, summ, valid, conc, fix, cats, evals, partial, rating
     fulfil = top[top.theme.isin(["missing_items", "wrong_item"])].reviews.sum()
     worst_rc = rating.sort_values(ascending=False)
     total_rc = rating.sum()
-    rep_hi = table[table.repeat_n >= 100].repeat_rate.max()
-    rep_lo = table[table.repeat_n >= 100].repeat_rate.min()
     nad = cats["not_as_described"].head(3)
     lines = []
     if partial:
@@ -173,9 +171,7 @@ def findings_md(cfg, table, summ, valid, conc, fix, cats, evals, partial, rating
         f"- **A small group of sellers has a much worse record.** Among {conc['sellers_rated']:,} sellers with at least {conc['min_reviews']} written reviews, "
         f"the worst 10% ({conc['worst_sellers']}) draw a complaint on {_pct(conc['worst_rate'])} of reviews, against {_pct(conc['rest_rate'])} for the rest. "
         f"They carry {_pct(conc['worst_share_of_reviews'])} of those reviews but {_pct(conc['worst_share_of_complaints'])} of the complaints.",
-        f"- **Complaints did not measurably change whether customers bought again.** Repeat purchase is rare on Olist "
-        f"({_pct(summ['no_complaint_repeat_rate'])} for customers with no complaint), and the rate for complaint themes ranges from "
-        f"{_pct(rep_lo)} to {_pct(rep_hi)} with overlapping confidence intervals. So I rank problems by the orders and ratings they affect, not by churn.",
+        repeat_line(table, summ),
         f"- **Complaints take {total_rc:.2f} stars off the average rating of written reviews.** {LABEL[worst_rc.index[0]]} is the largest share "
         f"({worst_rc.iloc[0]:.2f}), then {LABEL[worst_rc.index[1]].lower()} ({worst_rc.iloc[1]:.2f}).",
     ]
@@ -198,12 +194,47 @@ def findings_md(cfg, table, summ, valid, conc, fix, cats, evals, partial, rating
     return "\n".join(lines)
 
 
+def repeat_split(table, summ):
+    """Themes whose repeat rate interval sits wholly below the no complaint interval."""
+    lower = table[table.repeat_ci_high < summ["no_complaint_repeat_ci_low"]]
+    return lower, table.drop(lower.index)
+
+
+def repeat_line(table, summ) -> str:
+    lower, _ = repeat_split(table, summ)
+    base = f"{summ['no_complaint_repeat_rate']:.1%} for customers with no complaint"
+    if lower.empty:
+        return (f"- **Complaints did not measurably change whether customers bought again.** Repeat purchase is rare on Olist ({base}), "
+                "and every complaint theme's 95% interval overlaps it. So I rank problems by the orders and ratings they affect, not by churn.")
+    names = ", ".join(f"{LABEL[r.theme].lower()} ({r.repeat_rate:.1%})" for r in lower.itertuples())
+    return (f"- **Only one kind of complaint clearly cost repeat customers: {names}.** " if len(lower) == 1 else
+            f"- **Only some complaints clearly cost repeat customers: {names}.** ") + (
+            f"That compares with {base}, and the 95% intervals do not overlap. For every other theme the difference is within noise. "
+            "Repeat purchase is rare on Olist, so the money at stake through churn is small, and I rank problems by the orders and ratings they affect.")
+
+
 def write_findings(block: str) -> None:
     readme = ROOT / "README.md"
     s = readme.read_text(encoding="utf-8")
     new = f"<!-- FINDINGS:START -->\n\n{block}\n\n<!-- FINDINGS:END -->"
     s = re.sub(r"<!-- FINDINGS:START -->.*?<!-- FINDINGS:END -->", lambda _: new, s, flags=re.S)
     readme.write_text(s, encoding="utf-8")
+
+
+def repeat_report(table, summ) -> str:
+    lower, _ = repeat_split(table, summ)
+    lo, hi = summ["no_complaint_repeat_ci_low"], summ["no_complaint_repeat_ci_high"]
+    head = f"The no complaint rate's 95% interval is {lo:.1%} to {hi:.1%}. "
+    if lower.empty:
+        return head + "Every theme's interval overlaps it, so the data cannot show a churn effect."
+    out = []
+    for r in lower.itertuples():
+        lost = (summ["no_complaint_repeat_rate"] - r.repeat_rate) * r.repeat_n
+        out.append(f"{LABEL[r.theme]} sits wholly below it ({r.repeat_rate:.1%}, {r.repeat_ci_low:.1%} to {r.repeat_ci_high:.1%}): "
+                   f"about {lost:.0f} fewer returning customers out of {r.repeat_n:,} than the no complaint rate would give.")
+    return head + " ".join(out) + (" Every other theme overlaps the no complaint rate. Because repeat purchase is this rare, "
+                                   "the money at stake through churn is small next to the order value each problem touches, "
+                                   "so the fix list ranks by order value and rating.")
 
 
 def report_md(cfg, table, summ, valid, conc, fix, cats, evals, partial, rating) -> str:
@@ -266,8 +297,7 @@ def report_md(cfg, table, summ, valid, conc, fix, cats, evals, partial, rating) 
                   "repeat_rate": ("Bought again", lambda x: f"{x:.1%}"),
                   "repeat_ci_low": ("95% interval", lambda x: f"{x:.1%}"),
                   "repeat_ci_high": ("", lambda x: f"to {x:.1%}")}),
-              "", "The intervals overlap the no complaint rate for every theme. With repeat purchase this rare, the data cannot show a churn effect, "
-              "so the fix list ranks problems by the orders and ratings they affect instead.", "",
+              "", repeat_report(table, summ), "",
               "## 5. Where the problems come from", "",
               f"Among {conc['sellers_rated']:,} sellers with at least {conc['min_reviews']} written reviews, the worst 10% by complaint rate "
               f"({conc['worst_sellers']} sellers) draw a complaint on {_pct(conc['worst_rate'])} of reviews against {_pct(conc['rest_rate'])} for the rest, "

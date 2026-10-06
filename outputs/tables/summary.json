@@ -1,0 +1,22 @@
+{
+  "reviews_total": 99224,
+  "reviews_with_text": 40950,
+  "reviews_classified": 40950,
+  "complaint_reviews": 16886,
+  "complaint_share": 0.41235653235653236,
+  "multi_theme_share": 0.32115361838209167,
+  "no_complaint_avg_stars": 4.6974734042553195,
+  "no_complaint_repeat_rate": 0.044348485732625315,
+  "no_complaint_repeat_n": 17137,
+  "no_complaint_repeat_ci_low": 0.041366939355372105,
+  "no_complaint_repeat_ci_high": 0.047534273056508536,
+  "complaint_order_value": 2630338.72,
+  "all_order_value": 13591643.700000003,
+  "sellers_rated": 287,
+  "min_reviews": 30,
+  "worst_sellers": 29,
+  "worst_rate": 0.6699076324744774,
+  "rest_rate": 0.3879572268476502,
+  "worst_share_of_complaints": 0.12292595896520964,
+  "worst_share_of_reviews": 0.07507299270072992
+}
