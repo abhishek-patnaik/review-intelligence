@@ -4,7 +4,7 @@
     python -m reviews smoke --n 20     classify a few random reviews and print them
     python -m reviews sample           draw the hand labelling sample and translate it
     python -m reviews label            open the labelling tool in the browser
-    python -m reviews evaluate         score the model on the dev split of the reference labels
+    python -m reviews evaluate         score the model on the dev split while tuning the prompt
 """
 
 from __future__ import annotations
@@ -128,7 +128,7 @@ def main() -> None:
     sub.add_parser("label").set_defaults(func=cmd_label)
     s = sub.add_parser("evaluate")
     s.add_argument("--split", default="dev", choices=["dev", "test", "all"])
-    s.add_argument("--labels", default="reference", choices=["reference", "human"])
+    s.add_argument("--labels", default="working", choices=["working", "human"])
     s.add_argument("--model", default=None, help="override the model in config.toml")
     s.add_argument("--confirm-test", action="store_true")
     s.set_defaults(func=cmd_evaluate)

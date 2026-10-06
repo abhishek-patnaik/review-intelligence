@@ -76,6 +76,6 @@ def agreement(a, b, themes: list[str]) -> dict:
 
 def load_truth(source: str) -> pd.DataFrame:
     sample = pd.read_csv(lab.SAMPLE_FILE, dtype={"review_id": str}, keep_default_na=False)
-    f = lab.LABEL_DIR / ("reference_labels.csv" if source == "reference" else "labels.csv")
+    f = lab.LABEL_DIR / ("reference_labels.csv" if source == "working" else "labels.csv")
     truth = pd.read_csv(f, dtype=str, keep_default_na=False)[["review_id", "themes"]]
     return sample.merge(truth, on="review_id")
