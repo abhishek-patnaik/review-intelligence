@@ -4,6 +4,7 @@
     python -m reviews smoke --n 20     classify a few random reviews and print them
     python -m reviews sample           draw the hand labelling sample and translate it
     python -m reviews label            open the labelling tool in the browser
+    python -m reviews label --test     label only the 100 hand labelled test reviews
     python -m reviews evaluate         score the model on the dev split while tuning the prompt
 """
 
@@ -74,7 +75,7 @@ def cmd_label(args) -> None:
 
     if not labels.SAMPLE_FILE.exists():
         raise SystemExit("No sample yet. Run: python -m reviews sample")
-    label_app.serve(load_config())
+    label_app.serve(load_config(), only_test=args.test)
 
 
 def cmd_evaluate(args) -> None:
@@ -90,9 +91,11 @@ def cmd_evaluate(args) -> None:
     clf = Classifier(cfg)
     clf.check()
     df = ev.load_truth(args.labels)
-    if args.split != "all":
+    if args.split == "human_test":
+        df = df[df.human_test.astype(int) == 1]
+    elif args.split != "all":
         df = df[df.split == args.split]
-    if args.split == "test" and not args.confirm_test:
+    if args.split in ("test", "human_test") and not args.confirm_test:
         raise SystemExit("The test split is scored once, at the very end. Add --confirm-test if that is now.")
     themes = list(cfg["themes"])
     print(f"Scoring {cfg['llm']['model']} (prompt {cfg['llm']['prompt_version']}) on "
@@ -125,9 +128,11 @@ def main() -> None:
     s = sub.add_parser("sample")
     s.add_argument("--force", action="store_true")
     s.set_defaults(func=cmd_sample)
-    sub.add_parser("label").set_defaults(func=cmd_label)
+    s = sub.add_parser("label")
+    s.add_argument("--test", action="store_true")
+    s.set_defaults(func=cmd_label)
     s = sub.add_parser("evaluate")
-    s.add_argument("--split", default="dev", choices=["dev", "test", "all"])
+    s.add_argument("--split", default="dev", choices=["dev", "test", "human_test", "all"])
     s.add_argument("--labels", default="working", choices=["working", "human"])
     s.add_argument("--model", default=None, help="override the model in config.toml")
     s.add_argument("--confirm-test", action="store_true")

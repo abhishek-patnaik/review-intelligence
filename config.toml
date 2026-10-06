@@ -30,6 +30,8 @@ per_score = 100
 dev_share = 0.3
 random_seed = 42
 port = 8765
+# Test reviews I label by hand for the headline accuracy (per star rating).
+human_test_per_score = 20
 
 [translate]
 # Offline Portuguese to English model from Argos Translate, run with

@@ -19,8 +19,10 @@ from reviews import labels
 PAGE = Path(__file__).with_name("label_app.html")
 
 
-def _payload(cfg: dict) -> dict:
+def _payload(cfg: dict, only_test: bool) -> dict:
     sample = pd.read_csv(labels.SAMPLE_FILE, dtype={"review_id": str}, keep_default_na=False)
+    if only_test:
+        sample = sample[sample.human_test.astype(int) == 1]
     done = labels.load_labels().set_index("review_id").to_dict("index")
     items = []
     for row in sample.itertuples():
@@ -35,7 +37,7 @@ def _payload(cfg: dict) -> dict:
     return {"themes": cfg["themes"], "items": items}
 
 
-def serve(cfg: dict) -> None:
+def serve(cfg: dict, only_test: bool = False) -> None:
     port = cfg["labels"].get("port", 8765)
 
     class Handler(BaseHTTPRequestHandler):
@@ -50,7 +52,7 @@ def serve(cfg: dict) -> None:
             if self.path == "/":
                 self._send(200, PAGE.read_bytes(), "text/html; charset=utf-8")
             elif self.path == "/api/items":
-                self._send(200, json.dumps(_payload(cfg)).encode(), "application/json")
+                self._send(200, json.dumps(_payload(cfg, only_test)).encode(), "application/json")
             else:
                 self._send(404, b"not found", "text/plain")
 
