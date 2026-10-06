@@ -11,6 +11,10 @@ host = "http://localhost:11434"
 model = "qwen2.5:7b"
 temperature = 0
 random_seed = 42
+# Bump this whenever the prompt changes, so cached answers from an older
+# prompt are never mixed with new ones.
+prompt_version = "v1"
+timeout_seconds = 120
 
 [labels]
 # Reviews I label by hand to measure how often the model is right.
@@ -37,3 +41,20 @@ items = 112650
 payments = 103886
 products = 32951
 categories = 71
+
+# Complaint themes the model can assign. A review can carry more than one.
+# Drafted from reading about 120 real reviews across all star ratings, then
+# frozen before hand labelling so the labels and the model use the same list.
+[themes]
+not_delivered = "Customer says the order has not arrived yet or was never received"
+late_delivery = "Order arrived, but later than promised, or the customer complains delivery took too long"
+missing_items = "Order arrived incomplete: fewer units or parts than ordered"
+wrong_item = "A different product, model, colour or size was sent"
+damaged_defective = "Product arrived broken or damaged, or does not work"
+not_as_described = "Product differs from the listing, photos or specs, or seems fake"
+poor_quality = "Product works but quality is lower than expected: flimsy, cheap material"
+seller_support = "Seller or store did not respond, poor communication, no tracking information"
+refund_return = "Problems getting a refund, return, exchange or cancellation"
+packaging = "Complaint about packaging or how the item was packed"
+price_shipping = "Product or shipping is too expensive"
+other_complaint = "A complaint that fits none of the themes above"
